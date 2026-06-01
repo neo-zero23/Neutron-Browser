@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+  <title>Favoritos - Neutron Browser</title>
+  <link rel="stylesheet" href="favorites-style.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+</head>
+<body>
+  <div id="favorites-app">
+    <div class="favorites-header">
+      <h3>Favoritos</h3>
+      <button id="close-favorites-btn" class="favorites-close-btn" title="Cerrar">✕</button>
+    </div>
+    <div id="favorites-list" class="favorites-list"></div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="favorites-renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://suggestqueries.google.com https://api.bing.com https://duckduckgo.com https://www.startpage.com; img-src 'self' data: https:; media-src 'self' https:; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self';">
+  <title>Neutron Browser</title>
+  <link rel="stylesheet" href="style.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div id="app-container">
+    <!-- Custom Window Title Bar -->
+    <header id="titlebar">
+      <div class="drag-region">
+        <div class="atom-logo">
+          <svg id="logo-icon" viewBox="0 0 24 24" width="18" height="18">
+            <path fill="currentColor"
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+          </svg>
+          <span id="logo-text">.</span>
+        </div>
+        <div id="tabs-list">
+          <!-- Dynamic tabs will be inserted here -->
+        </div>
+        <button id="add-tab-btn" title="Nueva Pestaña">+</button>
+      </div>
+      <div class="window-controls">
+        <button id="win-minimize" class="win-btn">—</button>
+        <button id="win-maximize" class="win-btn">🗖</button>
+        <button id="win-close" class="win-btn win-btn-close">✕</button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div id="main-layout">
+      <aside id="vertical-tabs-rail" class="vertical-tabs-rail hidden"></aside>
+
+      <!-- Sidebar Navigation -->
+      <aside id="sidebar">
+        <div id="sidebar-apps-list" class="sidebar-apps">
+        </div>
+        <button id="sidebar-fav-btn" class="sidebar-btn" title="Favoritos">★</button>
+
+        <div class="sidebar-footer">
+          <button id="atomic-mode-btn" class="sidebar-btn atomic-btn" title="Modo Atómico — Sin rastro">🔒</button>
+          <button id="clean-cache-btn" class="sidebar-btn clean-btn" title="Limpiar Caché y RAM">🧹</button>
+
+          <div class="ram-meter-container" title="Uso de RAM de Neutron">
+            <div id="ram-fill" class="ram-meter-fill"></div>
+          </div>
+          <span id="ram-text" class="ram-label">0MB</span>
+
+          <button id="panic-btn" class="sidebar-btn panic-btn"
+            title="¡Botón de Pánico! Silenciar y Minimizar">✕</button>
+        </div>
+      </aside>
+
+      <!-- Content Area -->
+      <main id="content-container">
+        <div id="toolbar">
+          <!-- Toggle sidebar button — always first, always visible -->
+          <button id="toggle-sidebar" class="nav-btn toggle-btn" title="Ocultar/Mostrar barra lateral">
+            <svg id="toggle-icon-open" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M3 3h18v18H3V3zm2 2v14h4V5H5zm6 0v14h8V5h-8z" />
+            </svg>
+            <svg id="toggle-icon-closed" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"
+              style="display:none;">
+              <path d="M3 3h18v18H3V3zm2 2v14h14V5H5z" />
+            </svg>
+          </button>
+
+          <button id="nav-back" class="nav-btn" title="Atrás">←</button>
+          <button id="nav-forward" class="nav-btn" title="Adelante">→</button>
+          <button id="nav-reload" class="nav-btn" title="Recargar">↻</button>
+          <button id="nav-home" class="nav-btn" title="Inicio">⌂</button>
+
+          <div id="search-container" class="url-bar-container">
+            <input id="url-input" type="text" placeholder="Busca en Google o ingresa una URL...">
+            <ul id="suggestions-list" class="suggestions-list"></ul>
+            <div id="loading-progress" class="progress-bar-hidden"></div>
+          </div>
+
+          <button id="nav-go" class="nav-btn go-btn" title="Ir">GO</button>
+
+          <!-- Settings button — always last, always visible -->
+          <button id="settings-btn" class="nav-btn settings-btn" title="Configuración">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path
+                d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" />
+            </svg>
+          </button>
+          <div id="profile-indicator" class="profile-indicator" title="Cambiar perfil">
+            <span id="profile-indicator-name">Default</span>
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
+              <path d="M7 10l5 5 5-5z" />
+            </svg>
+          </div>
+          <button id="history-btn" class="nav-btn history-btn" title="Historial">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path
+                d="M13 3C8.03 3 4 7.03 4 12h2c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06L6 18l4.06 1.06L11.06 20.1C12.32 21.09 13.88 21.5 15.5 21.5c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 4v5.59l4.24 2.54.76-1.23-3.5-2.1V7h-1.5z" />
+            </svg>
+          </button>
+          <div id="fav-btn-group" class="fav-btn-group">
+            <button id="fav-btn" class="nav-btn fav-btn" title="Añadir a favoritos">
+              <svg id="fav-star" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
+            <button id="fav-chevron" class="nav-btn fav-chevron" title="Añadir a...">▾</button>
+          </div>
+          <button id="shield-btn" class="nav-btn shield-btn" title="Protecciones">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path
+                d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm0 17.5c-3.75-1.07-6.5-4.46-6.5-8.5V7.19l6.5-2.09v14.4z" />
+            </svg>
+            <span id="shield-count-badge" class="shield-count-badge">0</span>
+          </button>
+          <button id="downloads-btn" class="nav-btn downloads-btn" title="Descargas">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+            </svg>
+            <span id="download-count-badge" class="download-count-badge" style="display:none;">0</span>
+          </button>
+        </div>
+
+        <!-- The WebContentsView is mounted dynamically in main.js -->
+      </main>
+    </div>
+  </div>
+
+  <!-- Profile Dropdown (toolbar) -->
+  <div id="profile-dropdown" class="profile-dropdown hidden">
+    <div id="profile-dropdown-list" class="profile-dropdown-list"></div>
+    <div class="profile-dropdown-footer">
+      <button id="new-profile-btn" class="profile-dropdown-btn">+ Nuevo perfil</button>
+      <button id="guest-mode-btn" class="profile-dropdown-btn guest-btn">Modo Invitado</button>
+    </div>
+  </div>
+
+  <!-- Profile Modal (first-run overlay) -->
+  <div id="profile-modal" class="profile-modal hidden">
+    <div class="profile-modal-backdrop"></div>
+    <div class="profile-modal-content">
+      <div class="profile-modal-header">
+        <h2>Bienvenido a Neutron</h2>
+        <p>Elige un perfil para empezar</p>
+      </div>
+      <div id="modal-profile-list" class="modal-profile-list"></div>
+      <div class="profile-modal-footer">
+        <button id="modal-new-profile-btn" class="profile-modal-btn">+ Nuevo perfil</button>
+        <button id="modal-guest-btn" class="profile-modal-btn guest-btn">Modo Invitado</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Profile Dialog -->
+  <div id="new-profile-dialog" class="profile-modal hidden">
+    <div class="profile-modal-backdrop"></div>
+    <div class="profile-modal-content profile-dialog-sm">
+      <h3>Nuevo perfil</h3>
+      <div class="profile-dialog-form">
+        <input id="new-profile-name" type="text" placeholder="Nombre del perfil" maxlength="20">
+        <input id="new-profile-color" type="color" value="#4ea8de">
+      </div>
+      <div class="profile-dialog-actions">
+        <button id="cancel-profile-btn" class="profile-modal-btn cancel-btn">Cancelar</button>
+        <button id="confirm-profile-btn" class="profile-modal-btn confirm-btn">Crear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bookmark type dropdown (fav-btn chevron) -->
+  <div id="fav-dropdown" class="fav-dropdown hidden">
+    <ul>
+      <li data-type="fav" data-label="Favoritos">★ Añadir a Favoritos</li>
+      <li data-type="sidebar" data-label="Sidebar">📌 Añadir a Sidebar</li>
+      <li data-type="home" data-label="Inicio">⌂ Añadir a Inicio</li>
+    </ul>
+  </div>
+
+  <!-- Bookmark context menu (right-click) -->
+  <div id="bookmark-ctx-menu" class="bookmark-ctx-menu hidden">
+    <ul>
+      <li id="bookmark-ctx-remove">✕ Eliminar marcador</li>
+    </ul>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="renderer.js"></script>
+</body>
+
+</html>

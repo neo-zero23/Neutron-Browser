@@ -1,0 +1,107 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('api', {
+  minimizeWindow: () => ipcRenderer.send('window-minimize'),
+  maximizeWindow: () => ipcRenderer.send('window-maximize'),
+  closeWindow: () => ipcRenderer.send('window-close'),
+
+  createTab: (data) => ipcRenderer.send('create-tab', data),
+  switchTab: (tabId) => ipcRenderer.send('switch-tab', tabId),
+  closeTab: (tabId) => ipcRenderer.send('close-tab', tabId),
+
+  getProfiles: () => ipcRenderer.invoke('get-profiles'),
+  selectProfile: (id) => ipcRenderer.send('select-profile', id),
+  createProfile: (data) => ipcRenderer.send('create-profile', data),
+  deleteProfile: (id) => ipcRenderer.send('delete-profile', id),
+  startGuest: () => ipcRenderer.send('start-guest'),
+  onProfileSelected: (callback) => ipcRenderer.on('profile-selected', (event, data) => callback(data)),
+  onProfileDeleted: (callback) => ipcRenderer.on('profile-deleted', (event, data) => callback(data)),
+  onProfilesInitialized: (callback) => ipcRenderer.on('profiles-initialized', (event, data) => callback(data)),
+  navigateTo: (url) => ipcRenderer.send('navigate-to', url),
+  goHome: () => ipcRenderer.send('go-home'),
+  searchQuery: (query) => ipcRenderer.send('search-query', query),
+  selectBackground: () => ipcRenderer.invoke('select-background'),
+
+  goBack: () => ipcRenderer.send('go-back'),
+  goForward: () => ipcRenderer.send('go-forward'),
+  reload: () => ipcRenderer.send('reload'),
+
+  clearMemory: () => ipcRenderer.send('clear-memory'),
+  triggerPanic: () => ipcRenderer.send('panic-mode'),
+  toggleSidebar: (visible) => ipcRenderer.send('sidebar-toggle', visible),
+  hideWebview: () => ipcRenderer.send('hide-active-webview'),
+  showWebview: () => ipcRenderer.send('show-active-webview'),
+
+  saveSettings: (settings) => ipcRenderer.send('save-settings', settings),
+  loadSettings: () => ipcRenderer.invoke('load-settings'),
+  purgeMemory: () => ipcRenderer.invoke('purge-memory'),
+  clearAtomicPartition: () => ipcRenderer.send('clear-atomic-partition'),
+  exportLocalData: () => ipcRenderer.invoke('export-local-data'),
+  importLocalData: () => ipcRenderer.invoke('import-local-data'),
+
+  requestSuggestions: (query) => ipcRenderer.send('get-suggestions', query),
+  onSuggestions: (callback) => ipcRenderer.on('suggestions-results', (event, data) => callback(data)),
+  requestLocalSuggestions: (query) => ipcRenderer.send('get-local-suggestions', query),
+  onLocalSuggestions: (callback) => ipcRenderer.on('local-suggestions-results', (event, data) => callback(data)),
+
+  getHistory: () => ipcRenderer.invoke('get-history'),
+  deleteHistoryEntry: (url) => ipcRenderer.send('delete-history-entry', url),
+  clearHistory: () => ipcRenderer.send('clear-history'),
+  openHistoryWindow: () => ipcRenderer.send('open-history-window'),
+  closeHistoryWindow: () => ipcRenderer.send('close-history-window'),
+
+  getFavorites: () => ipcRenderer.invoke('get-favorites'),
+  addFavorite: (data) => ipcRenderer.send('add-favorite', data),
+  removeFavorite: (url) => ipcRenderer.send('remove-favorite', url),
+  isFavorite: (url) => ipcRenderer.invoke('is-favorite', url),
+  openFavoritesWindow: () => ipcRenderer.send('open-favorites-window'),
+
+  getBookmarks: () => ipcRenderer.invoke('get-bookmarks'),
+  addBookmark: (data) => ipcRenderer.send('add-bookmark', data),
+  removeBookmark: (data) => ipcRenderer.send('remove-bookmark', data),
+  onBookmarksUpdated: (callback) => ipcRenderer.on('bookmarks-updated', (event, data) => callback(data)),
+  closeFavoritesWindow: () => ipcRenderer.send('close-favorites-window'),
+
+  cancelDownload: (id) => ipcRenderer.send('cancel-download', id),
+  pauseDownload: (id) => ipcRenderer.send('pause-download', id),
+  resumeDownload: (id) => ipcRenderer.send('resume-download', id),
+  revealDownload: (id) => ipcRenderer.send('reveal-download', id),
+  getActiveDownloads: () => ipcRenderer.invoke('get-active-downloads'),
+  openDownloadsWindow: () => ipcRenderer.send('open-downloads-window'),
+  closeDownloadsWindow: () => ipcRenderer.send('close-downloads-window'),
+
+  onDownloadStarted: (callback) => ipcRenderer.on('download-started', (event, data) => callback(data)),
+  onDownloadProgress: (callback) => ipcRenderer.on('download-progress', (event, data) => callback(data)),
+  onDownloadStateChanged: (callback) => ipcRenderer.on('download-state-changed', (event, data) => callback(data)),
+  onDownloadComplete: (callback) => ipcRenderer.on('download-complete', (event, data) => callback(data)),
+  onDownloadCancelled: (callback) => ipcRenderer.on('download-cancelled', (event, data) => callback(data)),
+  onDownloadError: (callback) => ipcRenderer.on('download-error', (event, data) => callback(data)),
+
+  showContextMenu: (data) => ipcRenderer.send('show-context-menu', data),
+
+  onTabCreated: (callback) => ipcRenderer.on('tab-created', (event, data) => callback(data)),
+  onTabSwitched: (callback) => ipcRenderer.on('tab-switched', (event, data) => callback(data)),
+  onTabClosed: (callback) => ipcRenderer.on('tab-closed', (event, data) => callback(data)),
+  onTabPinnedUpdated: (callback) => ipcRenderer.on('tab-pinned-updated', (event, data) => callback(data)),
+  onTabUrlChanged: (callback) => ipcRenderer.on('tab-url-changed', (event, data) => callback(data)),
+  onTabTitleChanged: (callback) => ipcRenderer.on('tab-title-changed', (event, data) => callback(data)),
+  onTabLoadingStarted: (callback) => ipcRenderer.on('tab-loading-started', (event, data) => callback(data)),
+  onTabLoadingFinished: (callback) => ipcRenderer.on('tab-loading-finished', (event, data) => callback(data)),
+  onOpenNewTabFromWeb: (callback) => ipcRenderer.on('open-new-tab-from-web', (event, url) => callback(url)),
+  onRamUsageUpdated: (callback) => ipcRenderer.on('ram-usage-updated', (event, ramMb) => callback(ramMb)),
+  onMemoryCleared: (callback) => ipcRenderer.on('memory-cleared', () => callback()),
+
+  getShieldConfig: () => ipcRenderer.invoke('get-shield-config'),
+  saveShieldConfig: (config) => ipcRenderer.send('save-shield-config', config),
+  addBlacklistedDomain: (domain) => ipcRenderer.send('add-blacklisted-domain', domain),
+  removeBlacklistedDomain: (domain) => ipcRenderer.send('remove-blacklisted-domain', domain),
+  blockCurrentSite: () => ipcRenderer.invoke('block-current-site'),
+  onShieldConfigUpdated: (callback) => ipcRenderer.on('shield-config-updated', (event, data) => callback(data)),
+  onShieldStatsUpdated: (callback) => ipcRenderer.on('shield-stats-updated', (event, count) => callback(count)),
+
+  requestRestart: () => ipcRenderer.send('request-restart'),
+  onRestartRequested: (callback) => ipcRenderer.on('restart-requested', (event, data) => callback(data)),
+  onSettingsUpdated: (callback) => ipcRenderer.on('settings-updated', (event, data) => callback(data)),
+  onHomeBackgroundChanged: (callback) => ipcRenderer.on('home-background-changed', (event, path) => callback(path)),
+  onThemeChanged: (callback) => ipcRenderer.on('theme-changed', (event, data) => callback(data))
+});

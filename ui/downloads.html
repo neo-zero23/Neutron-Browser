@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+  <title>Descargas - Neutron Browser</title>
+  <link rel="stylesheet" href="downloads-style.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+</head>
+<body>
+  <div id="downloads-app">
+    <div class="downloads-header">
+      <span>Descargas</span>
+      <button id="close-downloads-btn" class="downloads-close-btn" title="Cerrar">✕</button>
+    </div>
+    <div id="downloads-list" class="downloads-list"></div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="downloads-renderer.js"></script>
+</body>
+</html>

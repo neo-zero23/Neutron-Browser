@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neutron Browser - Bienvenida</title>
+  <link rel="stylesheet" href="onboarding.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="onboarding-container">
+    <div class="onboarding-header">
+      <div class="onboarding-logo">
+        <span class="logo-dot">●</span>
+      </div>
+      <h1 class="onboarding-title" data-i18n="onboarding.title">Bienvenido a Neutron</h1>
+      <p class="onboarding-subtitle" data-i18n="onboarding.subtitle">Navegador rápido, privado y optimizado</p>
+    </div>
+
+    <div class="onboarding-content">
+      <!-- Language Selection -->
+      <div class="onboarding-section">
+        <h2 class="section-title" data-i18n="onboarding.selectLanguage">Selecciona tu idioma</h2>
+        <div class="language-grid">
+          <button class="language-btn" data-language="es">
+            <span class="language-flag">🇪🇸</span>
+            <span class="language-label" data-i18n="onboarding.spanish">Español</span>
+          </button>
+          <button class="language-btn" data-language="en">
+            <span class="language-flag">🇺🇸</span>
+            <span class="language-label" data-i18n="onboarding.english">English</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Theme Selection -->
+      <div class="onboarding-section">
+        <h2 class="section-title" data-i18n="onboarding.selectTheme">Elige tu tema</h2>
+        <div class="theme-grid">
+          <button class="theme-btn" data-theme="dark">
+            <span class="theme-preview theme-preview-dark"></span>
+            <span class="theme-label" data-i18n="onboarding.darkTheme">Oscuro</span>
+          </button>
+          <button class="theme-btn" data-theme="light">
+            <span class="theme-preview theme-preview-light"></span>
+            <span class="theme-label" data-i18n="onboarding.lightTheme">Claro</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="onboarding-footer">
+      <button class="btn-start" id="btn-start" data-i18n="onboarding.start">Comenzar</button>
+      <p class="footer-note" data-i18n="onboarding.canChangeAnytime">Puedes cambiar esto después en configuración</p>
+    </div>
+  </div>
+
+  <script src="onboarding.js"></script>
+</body>
+</html>

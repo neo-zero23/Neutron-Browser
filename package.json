@@ -1,0 +1,40 @@
+{
+  "name": "neutron-browser",
+  "version": "2.0.0",
+  "description": "Neutron Browser - Modo Rendimiento Extremo en Electron",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-packager . \"Neutron Browser\" --platform=win32 --arch=x64 --icon=assets/Neutron_browser.ico --out=dist --overwrite --asar"
+  },
+  "build": {
+    "appId": "com.jesus.neutron-browser",
+    "productName": "Neutron Browser",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/Neutron_browser.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!.git/**"
+    ]
+  },
+  "keywords": [],
+  "author": "Jesús",
+  "license": "ISC",
+  "devDependencies": {
+    "@electron/packager": "^18.4.4",
+    "electron": "^41.7.0",
+    "electron-builder": "^25.1.8"
+  }
+}
