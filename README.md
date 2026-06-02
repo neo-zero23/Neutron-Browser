@@ -26,6 +26,11 @@ Platforms:
 - windows x64 (for now)
 - coming soon.
 
+<img width="256" height="256" alt="animmm" src="https://github.com/user-attachments/assets/fc7dc45c-6bfb-4b5b-9b8a-c95c187e09ae" />
+
+
+
+
 Resource usage typically during heavy tasks such as videos on youtube or twitch (tested on a laptop with 8GB of RAM)
 
 <img width="783" height="31" alt="Captura de pantalla 2026-06-02 085114" src="https://github.com/user-attachments/assets/48f63262-27db-4f2d-817e-d605d3a4609f" />
