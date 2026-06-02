@@ -12,7 +12,7 @@ Images:
 
 
 
-
+Typical resource usage (tested on a laptop with 8GB of RAM)
 <img width="793" height="34" alt="Captura de pantalla 2026-06-02 084642" src="https://github.com/user-attachments/assets/4b697471-1ad9-4a61-8fef-3dfee200963b" />
 
 
