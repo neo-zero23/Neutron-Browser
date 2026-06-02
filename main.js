@@ -119,6 +119,8 @@ const SEARCH_ENGINES = {
   startpage: 'https://www.startpage.com/do/search?q='
 };
 
+const WHATSAPP_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
 const DARK_MODE_CSS = `
   html { filter: invert(1) hue-rotate(180deg) !important; }
   img, video, canvas, picture, embed, object { filter: invert(1) hue-rotate(180deg) !important; }
@@ -1972,12 +1974,20 @@ function initNetworkShield() {
       callback({ cancel: false });
     });
 
-    if (neutronConfig.doNotTrack) {
-      sess.webRequest.onBeforeSendHeaders((details, callback) => {
-        const headers = { ...details.requestHeaders, DNT: '1' };
-        callback({ requestHeaders: headers });
-      });
-    }
+    sess.webRequest.onBeforeSendHeaders((details, callback) => {
+      const headers = { ...details.requestHeaders };
+
+      // Override User-Agent for WhatsApp Web compatibility
+      if (details.url && details.url.includes('web.whatsapp.com')) {
+        headers['User-Agent'] = WHATSAPP_UA;
+      }
+
+      if (neutronConfig.doNotTrack) {
+        headers['DNT'] = '1';
+      }
+
+      callback({ requestHeaders: headers });
+    });
   }
 
   registerSessionListener(session.defaultSession);
@@ -2002,12 +2012,20 @@ function registerShieldForPartition(partitionName) {
       callback({ cancel: false });
     });
 
-    if (neutronConfig.doNotTrack) {
-      sess.webRequest.onBeforeSendHeaders((details, callback) => {
-        const headers = { ...details.requestHeaders, DNT: '1' };
-        callback({ requestHeaders: headers });
-      });
-    }
+    sess.webRequest.onBeforeSendHeaders((details, callback) => {
+      const headers = { ...details.requestHeaders };
+
+      // Override User-Agent for WhatsApp Web compatibility
+      if (details.url && details.url.includes('web.whatsapp.com')) {
+        headers['User-Agent'] = WHATSAPP_UA;
+      }
+
+      if (neutronConfig.doNotTrack) {
+        headers['DNT'] = '1';
+      }
+
+      callback({ requestHeaders: headers });
+    });
   } catch (e) {
     console.error('[Shield] Partition register error:', e.message);
   }
