@@ -36,5 +36,43 @@ Resource usage typically during heavy tasks such as videos on youtube or twitch 
 <img width="783" height="31" alt="Captura de pantalla 2026-06-02 085114" src="https://github.com/user-attachments/assets/48f63262-27db-4f2d-817e-d605d3a4609f" />
 
 
+🚀 Installation (The Guide for Humans and Toasters and potatoes)
+
+1. Download the ".zip" file from the Releases section.
+
+2. Optional: If Windows Defender or another antivirus gets a little paranoid, it is most likely a false positive. You can verify the file yourself using VirusTotal if you want.
+   
+   If a warning appears, click "More info" and then "Run anyway".
+
+3. Extraction: Locate the downloaded ".zip" file, right-click it, and select "Extract All...".
+   
+   Recommendation: Create a new folder before extracting the files to keep everything organized.
+
+4. Launch: Open the extracted folder and run "Neutron_Browser.exe".
+
+5. If Windows shows another security warning, click "More info" and then "Run anyway".
+
+6. Done! Neutron Browser is now ready to use.
+
+---
+
+!!! A Quick Note
+
+Neutron Browser will not harm your device or steal your data.
+
+Windows may display security warnings because the application is not digitally signed by a certificate recognized by Microsoft. This is common for independent and open-source projects.
+
+If you would like to verify the file yourself, you can scan it using services such as VirusTotal.
+
+In current testing, the executable received a 0 detections result.
+
+<img width="1915" height="926" alt="Captura de pantalla 2026-06-02 203553" src="https://github.com/user-attachments/assets/a25a7d5d-5e69-453f-81e5-d0b1e8f91a55" />
+
+
+
+
+
+
+
 ## 📜 License
 This project is open-source and protected under the **GNU General Public License v3.0 (GPL-3.0)**. See the `LICENSE` file for more details.
