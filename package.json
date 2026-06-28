@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-packager . \"Neutron Browser\" --platform=win32 --arch=x64 --icon=assets/Neutron_browser.ico --out=dist --overwrite --asar"
+    "dist": "electron-packager . \"Neutron Browser\" --platform=win32 --arch=x64 --icon=assets/new-logo.ico --out=dist --overwrite --asar"
   },
   "build": {
     "appId": "com.jesus.neutron-browser",
@@ -15,7 +15,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/Neutron_browser.ico"
+      "icon": "assets/new-logo.ico"
     },
     "nsis": {
       "oneClick": true,
