@@ -22,6 +22,35 @@ Features:
 - browsing +
 - and browsing
 
+Ok now seriously, this browser's actual features are:
+
+**Browsing & UI**
+* Sidebar with vertical tabs, favorites, and shortcuts
+* Custom backgrounds & colors, light/dark mode
+* Adjustable density (compact, comfortable, wide)
+* Home button, multiple search engines
+* Built-in banner adblock (RIP, Fandom wiki popups 🙏)
+
+**Performance**
+* Tab Discarding — auto-frees RAM on inactive tabs
+* Process Manager with real-time CPU/RAM monitoring (Konami code: ↑↑↓↓←→←→BA 👀)
+* Hardware acceleration (toggleable in settings)
+* Smart favicon fallback chain
+
+**Privacy & Profiles**
+* User Profiles with custom avatars, names, and colors
+* Atomic Mode (guest/incognito)
+* History & downloads manager
+
+**Compatibility**
+* Widevine & video codec support
+* Broad site compatibility
+
+**Customization & Tools**
+* Fullscreen, zoom, DevTools
+* Keyboard shortcuts
+* Languages: English & Spanish (stable), Portuguese & French (in testing)
+
 Platforms: 
 - windows x64 (for now)
 - coming soon linux.
