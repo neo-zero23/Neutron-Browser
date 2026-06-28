@@ -24,7 +24,7 @@ Features:
 
 Platforms: 
 - windows x64 (for now)
-- coming soon.
+- coming soon linux.
 
 Resource usage typically during heavy tasks such as videos on youtube or twitch (tested on a laptop with 8GB of RAM)
 
