@@ -5,7 +5,7 @@ I wasn't going to release it, but I decided to do so so more people could try it
 
 Images:
 
-<img width="1919" height="1010" alt="Captura de pantalla 2026-06-02 083419" src="https://github.com/user-attachments/assets/c46902c7-0572-4826-a7a8-41a27714f7d9" />
+<img width="1918" height="1021" alt="Captura de pantalla 2026-06-28 121956" src="https://github.com/user-attachments/assets/929f3719-aa12-481a-b5bb-e25f844e1880" />
 
 
 
@@ -25,11 +25,6 @@ Features:
 Platforms: 
 - windows x64 (for now)
 - coming soon.
-
-<img width="256" height="256" alt="animmm" src="https://github.com/user-attachments/assets/fc7dc45c-6bfb-4b5b-9b8a-c95c187e09ae" />
-
-
-
 
 Resource usage typically during heavy tasks such as videos on youtube or twitch (tested on a laptop with 8GB of RAM)
 
