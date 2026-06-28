@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configuración - Neutron</title>
+  <title>Settings - Neutron</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
     :root,
     body.theme-dark {
       --bg: #131314;
-      --accent-blue-preset: #4ea8de;
+      --accent-blue-preset: #8c8c8c;
       --accent-blue: var(--accent-blue-current, var(--accent-blue-preset));
       --accent-green: #34d399;
       --accent-red: #e22d3d;
@@ -24,7 +24,7 @@
 
     body.theme-light {
       --bg: #e9edf2;
-      --accent-blue-preset: #2563eb;
+      --accent-blue-preset: #1a1a1e;
       --accent-blue: var(--accent-blue-current, var(--accent-blue-preset));
       --accent-green: #16a34a;
       --accent-red: #dc2626;
@@ -557,20 +557,20 @@
           d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" />
       </svg>
       <div class="header-text">
-        <h1>Configuración</h1>
-        <span>Neutron Browser v2.0.0</span>
+        <h1>Settings</h1>
+        <span>Neutron Browser v1.0.2</span>
       </div>
     </div>
 
     <!-- Tab navigation -->
     <div class="tabs">
       <button class="tab-btn active" data-tab="general">General</button>
-      <button class="tab-btn" data-tab="search">Búsqueda</button>
-      <button class="tab-btn" data-tab="privacy">Privacidad</button>
-      <button class="tab-btn" data-tab="shield">Escudo</button>
-      <button class="tab-btn" data-tab="appearance">Apariencia</button>
-      <button class="tab-btn" data-tab="customize">Personalización</button>
-      <button class="tab-btn" data-tab="performance">Rendimiento</button>
+      <button class="tab-btn" data-tab="search">Search</button>
+      <button class="tab-btn" data-tab="privacy">Privacy</button>
+      <button class="tab-btn" data-tab="shield">Shield</button>
+      <button class="tab-btn" data-tab="appearance">Appearance</button>
+      <button class="tab-btn" data-tab="customize">Customize</button>
+      <button class="tab-btn" data-tab="performance">Performance</button>
     </div>
 
     <!-- ===== GENERAL ===== -->
@@ -584,8 +584,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Hibernación Inteligente</h3>
-            <p>Suspende pestañas inactivas en segundo plano</p>
+            <h3>Smart Hibernation</h3>
+            <p>Suspend inactive background tabs</p>
           </div>
         </div>
         <button class="toggle" id="toggle-hibernation" role="switch" aria-checked="false"></button>
@@ -600,8 +600,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Bloqueo de Telemetría</h3>
-            <p>Inhabilita rastreadores y métricas de Chromium</p>
+            <h3>Telemetry Block</h3>
+            <p>Disable Chromium trackers and metrics</p>
           </div>
         </div>
         <button class="toggle" id="toggle-telemetry" role="switch" aria-checked="false"></button>
@@ -619,8 +619,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Motor de Búsqueda</h3>
-            <p>Elige el motor para la barra de direcciones</p>
+            <h3>Search Engine</h3>
+            <p>Choose the engine for the address bar</p>
           </div>
         </div>
         <div class="radio-group" id="search-engine-group">
@@ -670,8 +670,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Borrar Cookies al Salir</h3>
-            <p>Elimina todas las cookies al cerrar el navegador</p>
+            <h3>Clear Cookies on Exit</h3>
+            <p>Delete all cookies when closing the browser</p>
           </div>
         </div>
         <button class="toggle" id="toggle-cookies-exit" role="switch" aria-checked="false"></button>
@@ -686,8 +686,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Borrar Caché al Salir</h3>
-            <p>Limpia la caché al cerrar el navegador</p>
+            <h3>Clear Cache on Exit</h3>
+            <p>Clear the cache when closing the browser</p>
           </div>
         </div>
         <button class="toggle" id="toggle-cache-exit" role="switch" aria-checked="false"></button>
@@ -704,8 +704,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Bloquear Anuncios</h3>
-            <p>Bloquea dominios de publicidad conocidos</p>
+            <h3>Block Ads</h3>
+            <p>Block known advertising domains</p>
           </div>
         </div>
         <button class="toggle active" id="toggle-shield-ads" role="switch" aria-checked="true"></button>
@@ -720,8 +720,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Bloquear Rastreadores</h3>
-            <p>Bloquea dominios de tracking y analytics</p>
+            <h3>Block Trackers</h3>
+            <p>Block tracking and analytics domains</p>
           </div>
         </div>
         <button class="toggle active" id="toggle-shield-trackers" role="switch" aria-checked="true"></button>
@@ -736,8 +736,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Bloquear Telemetría</h3>
-            <p>Bloquea dominios de telemetría de navegador/OS</p>
+            <h3>Block Telemetry</h3>
+            <p>Block browser/OS telemetry domains</p>
           </div>
         </div>
         <button class="toggle" id="toggle-shield-telemetry" role="switch" aria-checked="false"></button>
@@ -752,22 +752,22 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Dominios Bloqueados</h3>
-            <p>Lista personalizada de dominios bloqueados</p>
+            <h3>Blocked Domains</h3>
+            <p>Custom list of blocked domains</p>
           </div>
         </div>
         <div style="display:flex;gap:6px;margin-bottom:8px;">
-          <input type="text" id="shield-domain-input" placeholder="ej: evil-tracker.com"
+          <input type="text" id="shield-domain-input" placeholder="e.g. evil-tracker.com"
             style="flex:1;background:rgba(19,19,20,0.6);border:1px solid var(--border-color);border-radius:8px;padding:10px 12px;color:var(--text-primary);font-family:'Inter',sans-serif;font-size:12px;outline:none;">
           <button id="shield-add-domain-btn"
             style="background:var(--accent-blue);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">+
-            Añadir</button>
+            Add</button>
         </div>
         <div id="shield-domain-list"
           style="display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
           <button id="shield-block-current-btn"
-            style="background:rgba(226,45,61,0.15);color:var(--accent-red);border:1px solid rgba(226,45,61,0.25);border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">Bloquear sitio actual</button>
+            style="background:rgba(226,45,61,0.15);color:var(--accent-red);border:1px solid rgba(226,45,61,0.25);border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">Block current site</button>
         </div>
       </div>
 
@@ -780,7 +780,7 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Peticiones Bloqueadas</h3>
+            <h3>Blocked Requests</h3>
             <p id="shield-blocked-count">0</p>
           </div>
         </div>
@@ -798,19 +798,19 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Tema de Interfaz</h3>
-            <p>Oscuro / Claro para el navegador</p>
+            <h3>Interface Theme</h3>
+            <p>Dark / Light for the browser</p>
           </div>
         </div>
         <div class="radio-group" id="theme-group" style="flex-direction:row;">
           <div class="radio-option selected" data-value="dark" style="flex:1;justify-content:center;">
-            <span class="radio-label">🌙 Oscuro</span>
+            <span class="radio-label">🌙 Dark</span>
           </div>
           <div class="radio-option" data-value="light" style="flex:1;justify-content:center;">
-            <span class="radio-label">☀️ Claro</span>
+            <span class="radio-label">☀️ Light</span>
           </div>
           <div class="radio-option" data-value="auto" style="flex:1;justify-content:center;">
-            <span class="radio-label">🌓 Automático</span>
+            <span class="radio-label">🌓 Auto</span>
           </div>
         </div>
       </div>
@@ -824,8 +824,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Modo Oscuro Forzado</h3>
-            <p>Fuerza tema oscuro en todos los sitios web</p>
+            <h3>Force Dark Mode</h3>
+            <p>Force dark theme on every website</p>
           </div>
         </div>
         <button class="toggle" id="toggle-dark-mode" role="switch" aria-checked="false"></button>
@@ -839,11 +839,26 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Pestañas Verticales</h3>
-            <p>Traslada las pestañas a un panel lateral izquierdo</p>
+            <h3>Vertical Tabs</h3>
+            <p>Move tabs to a left side panel</p>
           </div>
         </div>
         <button class="toggle" id="toggle-vertical-tabs" role="switch" aria-checked="false"></button>
+      </div>
+
+      <div class="card">
+        <div class="card-info">
+          <div class="card-icon green">
+            <svg viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-4v2h4v2h-4v2h4v2H9V7h6v2z" />
+            </svg>
+          </div>
+          <div class="card-label">
+            <h3>RAM Meter</h3>
+            <p>Show or hide the RAM usage bar in the sidebar</p>
+          </div>
+        </div>
+        <button class="toggle" id="toggle-ram-meter" role="switch" aria-checked="true"></button>
       </div>
 
       <div class="card" style="flex-direction:column;align-items:stretch;">
@@ -855,34 +870,37 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Color de Acento</h3>
-            <p>Color principal del navegador</p>
+            <h3>Accent Color</h3>
+            <p>Main browser color</p>
           </div>
         </div>
         <div id="accent-presets" style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="accent-swatch selected" data-color="#4ea8de"
+          <button class="accent-swatch selected" data-color="#8c8c8c"
+            style="background:#8c8c8c;width:36px;height:36px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s;"
+            title="Gray"></button>
+          <button class="accent-swatch" data-color="#4ea8de"
             style="background:#4ea8de;width:36px;height:36px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s;"
-            title="Azul"></button>
+            title="Blue"></button>
           <button class="accent-swatch" data-color="#2563eb"
             style="background:#2563eb;width:36px;height:36px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s;"
-            title="Azul intenso"></button>
+            title="Deep blue"></button>
           <button class="accent-swatch" data-color="#a855f7"
             style="background:#a855f7;width:36px;height:36px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s;"
-            title="Púrpura"></button>
+            title="Purple"></button>
           <button class="accent-swatch" data-color="#34d399"
             style="background:#34d399;width:36px;height:36px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s;"
-            title="Verde"></button>
+            title="Green"></button>
           <button class="accent-swatch" data-color="#e22d3d"
             style="background:#e22d3d;width:36px;height:36px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s;"
-            title="Rojo"></button>
+            title="Red"></button>
           <button class="accent-swatch" data-color="#e6b422"
             style="background:#e6b422;width:36px;height:36px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s;"
-            title="Ámbar"></button>
+            title="Amber"></button>
           <button class="accent-swatch" data-color="#f97316"
             style="background:#f97316;width:36px;height:36px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s;"
-            title="Naranja"></button>
+            title="Orange"></button>
           <div style="position:relative;display:inline-block;">
-            <input type="color" id="accent-custom" value="#4ea8de"
+            <input type="color" id="accent-custom" value="#8c8c8c"
               style="width:36px;height:36px;border-radius:50%;border:2px solid var(--border-color);cursor:pointer;padding:0;background:none;transition:all 0.2s;">
           </div>
         </div>
@@ -897,14 +915,14 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Densidad de Interfaz</h3>
-            <p>Ajusta el espaciado de la barra y pestañas</p>
+            <h3>Interface Density</h3>
+            <p>Adjust bar and tab spacing</p>
           </div>
         </div>
         <div class="density-options" id="density-group">
-          <button class="density-btn" data-value="compact">Compacta</button>
-          <button class="density-btn selected" data-value="comfortable">Cómoda</button>
-          <button class="density-btn" data-value="spacious">Espaciosa</button>
+          <button class="density-btn" data-value="compact">Compact</button>
+          <button class="density-btn selected" data-value="comfortable">Comfortable</button>
+          <button class="density-btn" data-value="spacious">Spacious</button>
         </div>
       </div>
     </div>
@@ -919,8 +937,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Botón de Inicio</h3>
-            <p>Muestra el botón 🏠 en la barra de navegación</p>
+            <h3>Home Button</h3>
+            <p>Show the 🏠 button in the navigation bar</p>
           </div>
         </div>
         <button class="toggle active" id="toggle-home-btn" role="switch" aria-checked="true"></button>
@@ -934,8 +952,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Barra Lateral</h3>
-            <p>Muestra la barra de accesos directos</p>
+            <h3>Sidebar</h3>
+            <p>Show the shortcut bar</p>
           </div>
         </div>
         <button class="toggle active" id="toggle-sidebar-vis" role="switch" aria-checked="true"></button>
@@ -949,8 +967,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Idiomas</h3>
-            <p>Cambia el idioma de toda la interfaz</p>
+            <h3>Languages</h3>
+            <p>Change the interface language</p>
           </div>
         </div>
         <select id="language-select" style="min-width:160px;background:rgba(19,19,20,0.6);border:1px solid var(--border-color);border-radius:8px;padding:10px 12px;color:var(--text-primary);font-family:'Inter',sans-serif;font-size:12px;outline:none;cursor:pointer;">
@@ -970,15 +988,15 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Fondo de Inicio</h3>
-            <p>Imagen personalizada como fondo de nueva pestaña</p>
+            <h3>Home Background</h3>
+            <p>Custom image as new tab background</p>
           </div>
         </div>
         <div style="display:flex;gap:6px;">
-          <input type="text" id="bg-path-display" readonly placeholder="Ninguna imagen seleccionada"
+          <input type="text" id="bg-path-display" readonly placeholder="No image selected"
             style="flex:1;background:rgba(19,19,20,0.6);border:1px solid var(--border-color);border-radius:8px;padding:10px 12px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:12px;outline:none;cursor:default;">
           <button id="select-bg-btn"
-            style="background:var(--accent-blue);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">Seleccionar</button>
+            style="background:var(--accent-blue);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">Select</button>
           <button id="clear-bg-btn"
             style="background:rgba(226,45,61,0.15);color:var(--accent-red);border:1px solid rgba(226,45,61,0.25);border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">✕</button>
         </div>
@@ -992,13 +1010,13 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3 id="sync-card-title">Sincronización local</h3>
-            <p id="sync-card-desc">Exporta o importa config, perfiles, marcadores e historial</p>
+            <h3 id="sync-card-title">Local Sync</h3>
+            <p id="sync-card-desc">Export or import config, profiles, bookmarks, and history</p>
           </div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <button id="sync-export-btn" style="background:var(--accent-blue);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">Exportar datos</button>
-          <button id="sync-import-btn" style="background:rgba(255,255,255,0.06);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">Importar datos</button>
+          <button id="sync-export-btn"             style="background:var(--accent-blue);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">Export data</button>
+          <button id="sync-import-btn" style="background:rgba(255,255,255,0.06);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">Import data</button>
           <span id="sync-status" style="font-size:12px;color:var(--text-muted);font-family:'Inter',sans-serif;"></span>
         </div>
       </div>
@@ -1015,7 +1033,7 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Desactivar WebRTC<span class="restart-badge">REQUIERE REINICIO</span></h3>
+            <h3>Disable WebRTC<span class="restart-badge">RESTART REQUIRED</span></h3>
             <p>Previene fugas de IP local (vital para VPNs)</p>
           </div>
         </div>
@@ -1031,7 +1049,7 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Desactivar Aceleración HW<span class="restart-badge">REQUIERE REINICIO</span></h3>
+            <h3>Disable HW Acceleration<span class="restart-badge">RESTART REQUIRED</span></h3>
             <p>Para hardware antiguo o problemas de drivers</p>
           </div>
         </div>
@@ -1047,8 +1065,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Ahorro de Energía</h3>
-            <p>Reduce FPS a 30, acelera hibernación y desactiva efectos visuales</p>
+            <h3>Energy Saver</h3>
+            <p>Reduce FPS to 30, accelerate hibernation, disable visual effects</p>
           </div>
         </div>
         <button class="toggle" id="toggle-energy-saver" role="switch" aria-checked="false"></button>
@@ -1062,8 +1080,8 @@
             </svg>
           </div>
           <div class="card-label">
-            <h3>Restauración de Sesión</h3>
-            <p>Reabre las pestañas al iniciar Neutron</p>
+            <h3>Session Restore</h3>
+            <p>Reopen tabs when starting Neutron</p>
           </div>
         </div>
         <button class="toggle" id="toggle-restore-session" role="switch" aria-checked="false"></button>
@@ -1073,17 +1091,17 @@
         <svg viewBox="0 0 24 24" width="18" height="18">
           <path d="M15 4V3H9v1H4v2h1v13c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V6h1V4h-5zm2 15H7V6h10v13z" />
         </svg>
-        PURGAR MEMORIA
+        PURGE MEMORY
       </button>
       <div class="purge-stats" id="purge-stats" style="display:none;"></div>
 
       <div class="status-bar">
-        <span>Motor V8</span>
-        <span class="ram-value" id="ram-display">Calculando...</span>
+        <span>V8 Engine</span>
+        <span class="ram-value" id="ram-display">Calculating...</span>
       </div>
     </div>
 
-    <div class="version">Neutron Browser v2.0.0</div>
+    <div class="version">Neutron Browser v1.0.2</div>
   </div>
 
   <script src="i18n.js"></script>
@@ -1091,7 +1109,7 @@
     const I18N = window.NeutronI18n;
     let currentLanguage = 'es';
     let settingsThemePreference = 'dark';
-    let settingsThemeAccent = '#4ea8de';
+    let settingsThemeAccent = '#8c8c8c';
     let settingsThemeMediaQuery = null;
     let settingsThemeMediaListener = null;
 
@@ -1132,6 +1150,7 @@
     setupToggle('toggle-vertical-tabs', 'verticalTabs');
     setupToggle('toggle-home-btn', 'showHomeButton');
     setupToggle('toggle-sidebar-vis', 'showSidebar');
+    setupToggle('toggle-ram-meter', 'showRamMeter');
     setupToggle('toggle-restore-session', 'restoreSession');
 
     const languageSelect = document.getElementById('language-select');
@@ -1312,6 +1331,7 @@
         if (config.restoreSession) document.getElementById('toggle-restore-session')?.classList.add('active');
         if (config.showHomeButton !== false) document.getElementById('toggle-home-btn')?.classList.add('active');
         if (config.showSidebar !== false) document.getElementById('toggle-sidebar-vis')?.classList.add('active');
+        if (config.showRamMeter !== false) document.getElementById('toggle-ram-meter')?.classList.add('active');
         if (config.language) {
           const languageSelect = document.getElementById('language-select');
           if (languageSelect) languageSelect.value = config.language;
@@ -1336,7 +1356,7 @@
             o.classList.toggle('selected', o.dataset.value === config.theme);
           });
         }
-        applySettingsTheme(config.theme || 'dark', config.accentColor || '#4ea8de');
+        applySettingsTheme(config.theme || 'dark', config.accentColor || '#8c8c8c');
       });
     }
 
@@ -1380,13 +1400,16 @@
     // Apply theme to settings page itself
     function applySettingsTheme(theme, accentColor) {
       settingsThemePreference = theme || 'dark';
-      settingsThemeAccent = accentColor || settingsThemeAccent || '#4ea8de';
+      settingsThemeAccent = accentColor || settingsThemeAccent || '#8c8c8c';
       const resolvedTheme = theme === 'auto'
         ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
         : theme;
       document.body.classList.remove('theme-dark', 'theme-light');
       document.body.classList.add(resolvedTheme === 'light' ? 'theme-light' : 'theme-dark');
-      const color = settingsThemeAccent || '#4ea8de';
+      const DEFAULT_DARK_ACCENT = '#8c8c8c';
+      const DEFAULT_LIGHT_ACCENT = '#1a1a1e';
+      const rawColor = settingsThemeAccent || DEFAULT_DARK_ACCENT;
+      const color = (rawColor === DEFAULT_DARK_ACCENT && resolvedTheme === 'light') ? DEFAULT_LIGHT_ACCENT : rawColor;
       document.documentElement.style.setProperty('--accent-blue-current', color);
       document.documentElement.style.setProperty('--accent-blue', color);
       if (accentCustom) accentCustom.value = color;
@@ -1573,7 +1596,7 @@
       }
       if (config.accentColor !== undefined || config.theme !== undefined) {
         const t = config.theme || (document.body.classList.contains('theme-light') ? 'light' : 'dark');
-        applySettingsTheme(t, config.accentColor || '#4ea8de');
+        applySettingsTheme(t, config.accentColor || '#8c8c8c');
       }
     }
 

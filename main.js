@@ -64,12 +64,13 @@ function buildTabContextMenu(tabId) {
     { label: NeutronI18n.t(neutronConfig.language || 'es', isPinned ? 'chrome.unpinTab' : 'chrome.pinTab'), click: () => toggleTabPin(tab.id) },
     { label: NeutronI18n.t(neutronConfig.language || 'es', 'chrome.duplicateTab'), click: () => duplicateTab(tab.id) },
     { label: NeutronI18n.t(neutronConfig.language || 'es', 'chrome.closeOtherTabs'), enabled: tabs.some(t => t.id !== tab.id && !t.pinned), click: () => closeOtherTabs(tab.id) },
+    { label: NeutronI18n.t(neutronConfig.language || 'es', 'chrome.discardTab'), enabled: !tab.discarded && tab.id !== activeTabId, click: () => discardTab(tab) },
     { type: 'separator' },
     { label: NeutronI18n.t(neutronConfig.language || 'es', 'chrome.closeTab'), click: () => closeTab(tab.id) }
   ]);
 }
 
-// ⚡ OPTIMIZATIONS: Low Consumption Profile — set BEFORE app is ready
+// ? OPTIMIZATIONS: Low Consumption Profile � set BEFORE app is ready
 app.commandLine.appendSwitch('js-flags', '--expose-gc --max-old-space-size=256');
 app.commandLine.appendSwitch('renderer-process-limit', '4');
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
@@ -82,10 +83,11 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 
 let mainWindow;
 let onboardingResolve = null; // Promise resolver for onboarding completion
-let isSwitchingFromOnboarding = false; // Prevents app.quit() during onboarding → main window transition
+let isSwitchingFromOnboarding = false; // Prevents app.quit() during onboarding ? main window transition
 let tabs = [];
 let activeTabId = null;
 let sidebarVisible = true;
+let overlayWebviewsHidden = false;
 let CONFIG_PATH;
 let SESSION_PATH;
 const DEFAULT_CONFIG = {
@@ -108,7 +110,7 @@ const DEFAULT_CONFIG = {
   language: 'es',
   homeBackgroundPath: '',
   theme: 'dark',
-  accentColor: '#4ea8de'
+  accentColor: '#8c8c8c'
 };
 let neutronConfig = { ...DEFAULT_CONFIG };
 
@@ -158,9 +160,12 @@ function saveNeutronConfig() {
 function saveSessionSnapshot() {
   if (!neutronConfig.restoreSession || !SESSION_PATH) return;
   try {
-    const meaningfulTabs = tabs.filter(tab => tab.url && !tab.url.startsWith('about:') && tab.profile !== 'invitado');
+    const meaningfulTabs = tabs.filter(tab => {
+      const effectiveUrl = tab.discarded ? tab.savedUrl : tab.url;
+      return effectiveUrl && !effectiveUrl.startsWith('about:') && tab.profile !== 'invitado';
+    });
     const tabsPayload = meaningfulTabs.map(tab => ({
-      url: tab.url || '',
+      url: tab.discarded ? (tab.savedUrl || tab.url || '') : (tab.url || ''),
       profile: tab.profile || 'default'
     }));
 
@@ -248,7 +253,7 @@ function createMainWindow() {
     minWidth: 800,
     minHeight: 600,
     frame: false,
-    icon: path.join(__dirname, 'assets', 'Neutron_browser.ico'),
+    icon: path.join(__dirname, 'assets', 'new-logo.ico'),
     backgroundColor: '#0d0d0d',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -274,9 +279,21 @@ function createMainWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  mainWindow.on('enter-full-screen', () => {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('fullscreen-changed', true);
+    }
+  });
+
+  mainWindow.on('leave-full-screen', () => {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('fullscreen-changed', false);
+    }
+  });
 }
 
-// ⚡ ONBOARDING WINDOW - First Launch Setup
+// ? ONBOARDING WINDOW - First Launch Setup
 let onboardingWindow = null;
 
 function createOnboardingWindow() {
@@ -308,7 +325,7 @@ function createOnboardingWindow() {
   onboardingWindow.once('ready-to-show', () => {
     if (onboardingWindow && !onboardingWindow.isDestroyed()) {
       onboardingWindow.show();
-      console.log('[⚙️] Onboarding window shown');
+      console.log('[??] Onboarding window shown');
     }
   });
 
@@ -316,7 +333,7 @@ function createOnboardingWindow() {
     onboardingWindow = null;
     // Handle Alt+F4 / unexpected close: resolve promise with defaults so app doesn't hang
     if (typeof onboardingResolve === 'function') {
-      console.log('[Onboarding] Window closed without completing — falling back to defaults');
+      console.log('[Onboarding] Window closed without completing � falling back to defaults');
       neutronConfig.firstLaunch = false;
       saveNeutronConfig();
       isSwitchingFromOnboarding = true;
@@ -346,6 +363,30 @@ function updateViewBounds(view) {
 
 const registeredShieldPartitions = new Set();
 
+function hideActiveWebview() {
+  overlayWebviewsHidden = true;
+  tabs.forEach(t => {
+    if (t.view && mainWindow && !mainWindow.isDestroyed()) {
+      try {
+        mainWindow.contentView.removeChildView(t.view);
+      } catch (e) { }
+    }
+  });
+}
+
+function showActiveWebview() {
+  overlayWebviewsHidden = false;
+  if (activeTabId) {
+    const tab = tabs.find(t => t.id === activeTabId);
+    if (tab && tab.view && !tab.view.webContents.isDestroyed()) {
+      try {
+        mainWindow.contentView.addChildView(tab.view);
+        updateViewBounds(tab.view);
+      } catch (e) { }
+    }
+  }
+}
+
 function createTab(url = null, profileId = null) {
   const tabId = Date.now().toString();
   const tabProfile = profileId || getActiveProfileName();
@@ -371,7 +412,7 @@ function createTab(url = null, profileId = null) {
 
   mainWindow.contentView.addChildView(view);
 
-  const tab = { id: tabId, view, url, title: 'Cargando...', profile: tabProfile, lastActive: Date.now(), hibernated: false, mediaPlaying: false, pinned: false };
+  const tab = { id: tabId, view, url, title: NeutronI18n.t(neutronConfig.language || 'es', 'chrome.loading'), profile: tabProfile, lastActive: Date.now(), hibernated: false, mediaPlaying: false, pinned: false, zoomLevel: 0, discarded: false, savedUrl: null, savedTitle: null };
   tabs.push(tab);
 
   if (tabProfile === 'invitado') guestTabCount++;
@@ -406,14 +447,14 @@ function createTab(url = null, profileId = null) {
       ]);
       menu.popup({ window: mainWindow });
     } catch (e) {
-      console.error('[🖱️ Context menu error:', e.message);
+      console.error('[??? Context menu error:', e.message);
     }
   });
 
   view.webContents.on('will-navigate', (event, url) => {
     if (isShieldBlocked(url)) {
       SHIELD_CONFIG.blockedCount++;
-      console.log(`[🛡️ Shield] Blocked navigation: ${url}`);
+      console.log(`[??? Shield] Blocked navigation: ${url}`);
       event.preventDefault();
     }
   });
@@ -474,7 +515,9 @@ function createTab(url = null, profileId = null) {
   });
 
   // Load home page or external URL
-  if (url && url.startsWith('file://')) {
+  if (resolveSpecialUrl(view.webContents, url || '')) {
+    // Special URL handled (e.g. neutron admin.task)
+  } else if (url && url.startsWith('file://')) {
     try {
       const filePath = fileURLToPath(url);
       view.webContents.loadFile(filePath);
@@ -484,7 +527,7 @@ function createTab(url = null, profileId = null) {
   } else if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
     if (isShieldBlocked(url)) {
       SHIELD_CONFIG.blockedCount++;
-      console.log(`[🛡️ Shield] Blocked tab load: ${url}`);
+      console.log(`[??? Shield] Blocked tab load: ${url}`);
       view.webContents.loadFile(path.join(__dirname, 'ui', 'home.html'));
     } else {
       view.webContents.loadURL(url);
@@ -505,7 +548,9 @@ function switchTab(tabId) {
   const tab = tabs.find(t => t.id === tabId);
   if (tab) {
     tab.lastActive = Date.now();
-    tab.hibernated = false;
+    if (tab.discarded) {
+      restoreTab(tab);
+    }
   }
   tabs.forEach(t => {
     if (!t.view || t.view.webContents.isDestroyed()) return;
@@ -543,11 +588,15 @@ function closeTab(tabId, force = false) {
     }
   }
 
-  tab.view.webContents.stop();
-  tab.view.webContents.setAudioMuted(true);
-  tab.view.webContents.loadURL('about:blank').catch(() => { });
-  mainWindow.contentView.removeChildView(tab.view);
-  tab.view.webContents.close();
+  if (tab.view && tab.view.webContents && !tab.view.webContents.isDestroyed()) {
+    tab.view.webContents.stop();
+    tab.view.webContents.setAudioMuted(true);
+    tab.view.webContents.loadURL('about:blank').catch(() => { });
+  }
+  try { mainWindow?.contentView?.removeChildView(tab.view); } catch (e) { }
+  if (tab.view && tab.view.webContents && !tab.view.webContents.isDestroyed()) {
+    tab.view.webContents.close();
+  }
   tab.view = null;
   tabs.splice(index, 1);
   mainWindow.webContents.send('tab-closed', { tabId });
@@ -580,9 +629,39 @@ ipcMain.on('window-maximize', () => {
 });
 ipcMain.on('window-close', () => mainWindow && mainWindow.close());
 
+// Fullscreen
+ipcMain.on('toggle-fullscreen', () => {
+  if (mainWindow) {
+    mainWindow.setFullScreen(!mainWindow.isFullScreen());
+  }
+});
+
+// DevTools
+ipcMain.on('toggle-devtools', () => {
+  const tab = getActiveTab();
+  if (tab && tab.view && tab.view.webContents && !tab.view.webContents.isDestroyed()) {
+    tab.view.webContents.toggleDevTools();
+  }
+});
+
+// Zoom
+ipcMain.on('zoom-in', () => { const t = getActiveTab(); if (t) zoomIn(t.id); });
+ipcMain.on('zoom-out', () => { const t = getActiveTab(); if (t) zoomOut(t.id); });
+ipcMain.on('zoom-reset', () => { const t = getActiveTab(); if (t) zoomReset(t.id); });
+
+// Tab discard
+ipcMain.on('discard-tab', (event, tabId) => {
+  const tab = getTabById(tabId);
+  if (tab) discardTab(tab);
+});
+
 ipcMain.on('create-tab', (event, { url, profile }) => createTab(url, profile));
 ipcMain.on('switch-tab', (event, tabId) => switchTab(tabId));
 ipcMain.on('close-tab', (event, tabId) => closeTab(tabId));
+ipcMain.on('close-current-tab', (event) => {
+  const tab = tabs.find(t => t.view && t.view.webContents && t.view.webContents === event.sender);
+  if (tab) closeTab(tab.id);
+});
 
 ipcMain.on('clear-atomic-partition', async () => {
   try {
@@ -590,9 +669,9 @@ ipcMain.on('clear-atomic-partition', async () => {
     await atomicSession.clearStorageData({
       storages: ['cookies', 'localstorage', 'indexdb', 'serviceworkers', 'cachestorage']
     });
-    console.log('[🔒 Atomic] Partition cleared');
+    console.log('[?? Atomic] Partition cleared');
   } catch (e) {
-    console.error('[🔒 Atomic] Clear error:', e.message);
+    console.error('[?? Atomic] Clear error:', e.message);
   }
 });
 
@@ -603,11 +682,25 @@ function broadcastShieldStats() {
   });
 }
 
+function resolveSpecialUrl(webContents, urlStr) {
+  const cleanUrl = urlStr.trim().toLowerCase();
+  if (cleanUrl === 'neutron admin.task' || cleanUrl === 'neutron:admin.task' || cleanUrl === 'neutron://admin.task') {
+    webContents.loadFile(path.join(__dirname, 'ui', 'task-manager.html')).catch(() => {});
+    return true;
+  }
+  return false;
+}
+
 ipcMain.on('navigate-to', (event, url) => {
   const tab = getActiveTab();
   if (!tab) return;
 
-  let targetUrl = url.trim();
+  const targetUrlStr = url.trim();
+  if (resolveSpecialUrl(tab.view.webContents, targetUrlStr)) {
+    return;
+  }
+
+  let targetUrl = targetUrlStr;
   if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
     if (targetUrl.includes('.') && !targetUrl.includes(' ')) {
       targetUrl = 'https://' + targetUrl;
@@ -619,7 +712,7 @@ ipcMain.on('navigate-to', (event, url) => {
 
   if (isShieldBlocked(targetUrl)) {
     SHIELD_CONFIG.blockedCount++;
-    console.log(`[🛡️ Shield] Blocked navigation: ${targetUrl}`);
+    console.log(`[??? Shield] Blocked navigation: ${targetUrl}`);
     broadcastShieldStats();
     return;
   }
@@ -636,8 +729,8 @@ ipcMain.on('go-home', () => {
 ipcMain.handle('select-background', async () => {
   const { dialog } = require('electron');
   const result = await dialog.showOpenDialog(mainWindow, {
-    title: 'Seleccionar fondo de inicio',
-    filters: [{ name: 'Imágenes', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'] }],
+    title: 'Select home background',
+    filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'] }],
     properties: ['openFile']
   });
   if (result.canceled || result.filePaths.length === 0) return '';
@@ -649,6 +742,10 @@ ipcMain.on('search-query', (event, query) => {
   if (!tab) return;
 
   const q = query.trim();
+  if (resolveSpecialUrl(tab.view.webContents, q)) {
+    return;
+  }
+
   let targetUrl;
   if (q.startsWith('http://') || q.startsWith('https://')) {
     targetUrl = q;
@@ -661,7 +758,7 @@ ipcMain.on('search-query', (event, query) => {
 
   if (isShieldBlocked(targetUrl)) {
     SHIELD_CONFIG.blockedCount++;
-    console.log(`[🛡️ Shield] Blocked search: ${targetUrl}`);
+    console.log(`[??? Shield] Blocked search: ${targetUrl}`);
     broadcastShieldStats();
     return;
   }
@@ -712,12 +809,12 @@ ipcMain.on('panic-mode', () => {
   if (mainWindow) mainWindow.minimize();
 });
 
-// ⚡ ONBOARDING COMPLETION HANDLER
+// ? ONBOARDING COMPLETION HANDLER
 ipcMain.on('onboarding-complete', (event, config) => {
-  console.log('[⚙️] Onboarding completed with config:', config);
+  console.log('[??] Onboarding completed with config:', config);
 
   if (!config || typeof config !== 'object') {
-    console.warn('[⚙️] Invalid onboarding config:', config);
+    console.warn('[??] Invalid onboarding config:', config);
     return;
   }
 
@@ -734,11 +831,11 @@ ipcMain.on('onboarding-complete', (event, config) => {
 
   // Save configuration
   saveNeutronConfig();
-  console.log('[⚙️] Configuration saved:', { language: neutronConfig.language, theme: neutronConfig.theme, firstLaunch: neutronConfig.firstLaunch });
+  console.log('[??] Configuration saved:', { language: neutronConfig.language, theme: neutronConfig.theme, firstLaunch: neutronConfig.firstLaunch });
 
   // Resolve the onboarding promise FIRST so app.whenReady() can create mainWindow
   if (typeof onboardingResolve === 'function') {
-    console.log('[⚙️] Resolving onboarding promise — letting app.whenReady() create main window');
+    console.log('[??] Resolving onboarding promise � letting app.whenReady() create main window');
     onboardingResolve(config);
     onboardingResolve = null;
   }
@@ -749,7 +846,7 @@ ipcMain.on('onboarding-complete', (event, config) => {
   // Destroy onboarding window AFTER resolving promise and setting flag
   if (onboardingWindow && !onboardingWindow.isDestroyed()) {
     onboardingWindow.destroy();
-    console.log('[⚙️] Onboarding window destroyed');
+    console.log('[??] Onboarding window destroyed');
   }
 });
 
@@ -838,18 +935,16 @@ ipcMain.on('request-restart', () => {
   app.quit();
 });
 
-ipcMain.on('hide-active-webview', () => {
-  const tab = getActiveTab();
-  if (tab) tab.view.setVisible(false);
+ipcMain.handle('hide-active-webview', () => {
+  hideActiveWebview();
 });
 
-ipcMain.on('show-active-webview', () => {
-  const tab = getActiveTab();
-  if (tab) tab.view.setVisible(true);
+ipcMain.handle('show-active-webview', () => {
+  showActiveWebview();
 });
 
 ipcMain.handle('load-settings', () => {
-  return neutronConfig;
+  return { ...neutronConfig, appVersion: app.getVersion() };
 });
 
 ipcMain.handle('purge-memory', async () => {
@@ -966,7 +1061,86 @@ function applyWebRTCConfig() {
 }
 
 // =====================================================================
-// 💤 SMART HIBERNATION
+// ?? ZOOM
+// =====================================================================
+
+const ZOOM_LEVELS = [-4, -3, -2, -1, 0, 1, 2, 3, 4]; // maps to setZoomLevel values
+
+function zoomIn(tabId) {
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab || !tab.view || tab.view.webContents.isDestroyed()) return;
+  const nextZoom = Math.min(tab.zoomLevel + 1, ZOOM_LEVELS.length - 1);
+  if (nextZoom !== tab.zoomLevel) {
+    tab.zoomLevel = nextZoom;
+    tab.view.webContents.setZoomLevel(ZOOM_LEVELS[nextZoom]);
+    broadcastZoomLevel(tabId, ZOOM_LEVELS[nextZoom]);
+  }
+}
+
+function zoomOut(tabId) {
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab || !tab.view || tab.view.webContents.isDestroyed()) return;
+  const nextZoom = Math.max(tab.zoomLevel - 1, 0);
+  if (nextZoom !== tab.zoomLevel) {
+    tab.zoomLevel = nextZoom;
+    tab.view.webContents.setZoomLevel(ZOOM_LEVELS[nextZoom]);
+    broadcastZoomLevel(tabId, ZOOM_LEVELS[nextZoom]);
+  }
+}
+
+function zoomReset(tabId) {
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab || !tab.view || tab.view.webContents.isDestroyed()) return;
+  const defaultIdx = ZOOM_LEVELS.indexOf(0);
+  if (tab.zoomLevel !== defaultIdx) {
+    tab.zoomLevel = defaultIdx;
+    tab.view.webContents.setZoomLevel(0);
+    broadcastZoomLevel(tabId, 0);
+  }
+}
+
+function broadcastZoomLevel(tabId, level) {
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    const pct = Math.round((1 + level * 0.25) * 100);
+    mainWindow.webContents.send('zoom-changed', { tabId, level, percent: pct });
+  }
+}
+
+// =====================================================================
+// ??? TAB DISCARDING
+// =====================================================================
+
+function discardTab(tab) {
+  if (!tab || !tab.view || tab.view.webContents.isDestroyed() || tab.discarded || tab.id === activeTabId) return;
+  tab.savedUrl = tab.url;
+  tab.savedTitle = tab.title;
+  tab.discarded = true;
+  // Only throttle + mute. No contentView manipulation, no setVisible, no setBounds.
+  // switchTab handles contentView add/remove as usual.
+  tab.view.webContents.setFrameRate(1);
+  tab.view.webContents.setAudioMuted(true);
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('tab-discarded', { tabId: tab.id, url: tab.savedUrl, title: tab.savedTitle });
+  }
+  console.log(`[??? Discard] Tab ${tab.id} discarded`);
+}
+
+function restoreTab(tab) {
+  if (!tab || !tab.view || tab.view.webContents.isDestroyed() || !tab.discarded) return;
+  tab.discarded = false;
+  // Just restore speed + audio. switchTab handles addChildView + bounds + focus + wakeTab.
+  tab.view.webContents.setFrameRate(60);
+  tab.view.webContents.setAudioMuted(false);
+  tab.savedUrl = null;
+  tab.savedTitle = null;
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('tab-restored', { tabId: tab.id });
+  }
+  console.log(`[??? Discard] Tab ${tab.id} restored`);
+}
+
+// =====================================================================
+// ?? SMART HIBERNATION
 // =====================================================================
 
 let hibernationTimer = null;
@@ -981,16 +1155,13 @@ function hibernateTab(tab) {
   tab.view.webContents.setFrameRate(1);
   tab.view.webContents.setAudioMuted(true);
   tab.view.setVisible(false);
-  console.log(`[💤 Hibernation] Tab ${tab.id} hibernated`);
+  console.log(`[?? Hibernation] Tab ${tab.id} hibernated`);
 }
 
 function wakeTab(tab) {
   if (!tab || !tab.view || tab.view.webContents.isDestroyed()) return;
-  if (tab.hibernated) {
-    tab.hibernated = false;
-    tab.view.setVisible(true);
-    console.log(`[💤 Hibernation] Tab ${tab.id} awakened`);
-  }
+  tab.hibernated = false;
+  tab.view.setVisible(true);
   tab.view.webContents.setFrameRate(60);
   tab.view.webContents.setAudioMuted(false);
 }
@@ -1010,19 +1181,19 @@ function runHibernationCheck() {
 function startHibernationTimer() {
   stopHibernationTimer();
   hibernationTimer = setInterval(runHibernationCheck, 60000);
-  console.log('[💤 Hibernation] Timer started');
+  console.log('[?? Hibernation] Timer started');
 }
 
 function stopHibernationTimer() {
   if (hibernationTimer) {
     clearInterval(hibernationTimer);
     hibernationTimer = null;
-    console.log('[💤 Hibernation] Timer stopped');
+    console.log('[?? Hibernation] Timer stopped');
   }
 }
 
 // =====================================================================
-// ⚡ ENERGY SAVER
+// ? ENERGY SAVER
 // =====================================================================
 
 function applyEnergySaverToTabs() {
@@ -1038,11 +1209,11 @@ function applyEnergySaverToTabs() {
       }
     }
   });
-  console.log(`[⚡ Energy Saver] ${active ? 'ON' : 'OFF'} — applied to ${tabs.length} tabs`);
+  console.log(`[? Energy Saver] ${active ? 'ON' : 'OFF'} � applied to ${tabs.length} tabs`);
 }
 
 // =====================================================================
-// 📜 LOCAL HISTORY SUGGESTIONS
+// ?? LOCAL HISTORY SUGGESTIONS
 // =====================================================================
 
 ipcMain.on('get-local-suggestions', (event, query) => {
@@ -1062,49 +1233,14 @@ ipcMain.on('clear-history', () => {
   NeutronDB.clearHistory();
 });
 
-let historyWindow = null;
-
-ipcMain.on('open-history-window', () => {
-  if (historyWindow && !historyWindow.isDestroyed()) {
-    historyWindow.focus();
-    return;
-  }
-
-  historyWindow = new BrowserWindow({
-    width: 420,
-    height: 600,
-    minHeight: 300,
-    minWidth: 350,
-    frame: true,
-    backgroundColor: '#131314',
-    parent: mainWindow,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false
-    }
-  });
-
-  historyWindow.loadFile(path.join(__dirname, 'ui', 'history.html'));
-  historyWindow.setMenuBarVisibility(false);
-
-  historyWindow.on('closed', () => { historyWindow = null; });
-});
-
-ipcMain.on('close-history-window', () => {
-  if (historyWindow && !historyWindow.isDestroyed()) {
-    historyWindow.close();
-  }
-});
-
 // =====================================================================
-// ⭐ FAVORITES
+// ? FAVORITES
 // =====================================================================
 
 let favoritesWindow = null;
 
 // =====================================================================
-// 📑 BOOKMARKS MANAGER (sidebar + home + fav)
+// ?? BOOKMARKS MANAGER (sidebar + home + fav)
 // =====================================================================
 
 let BOOKMARKS_PATH;
@@ -1270,7 +1406,7 @@ ipcMain.on('close-favorites-window', () => {
 });
 
 // =====================================================================
-// 🔄 LOCAL SYNC
+// ?? LOCAL SYNC
 // =====================================================================
 
 function buildSyncPayload() {
@@ -1303,7 +1439,7 @@ function applyImportedState(payload) {
   if (payload.profiles && typeof payload.profiles === 'object') {
     profilesData = {
       lastUsed: payload.profiles.lastUsed || 'default',
-      profiles: Array.isArray(payload.profiles.profiles) ? payload.profiles.profiles : [{ id: 'default', name: 'Default', color: '#4ea8de' }]
+      profiles: Array.isArray(payload.profiles.profiles) ? payload.profiles.profiles : [{ id: 'default', name: 'Default', color: '#8c8c8c' }]
     };
     ensureDefaultProfile();
     saveProfiles();
@@ -1330,7 +1466,7 @@ function applyImportedState(payload) {
 
 ipcMain.handle('export-local-data', async () => {
   const result = await dialog.showSaveDialog(mainWindow, {
-    title: 'Exportar datos de Neutron',
+    title: 'Export Neutron data',
     defaultPath: 'neutron-backup.json',
     filters: [{ name: 'JSON', extensions: ['json'] }]
   });
@@ -1342,7 +1478,7 @@ ipcMain.handle('export-local-data', async () => {
 
 ipcMain.handle('import-local-data', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
-    title: 'Importar datos de Neutron',
+    title: 'Import Neutron data',
     filters: [{ name: 'JSON', extensions: ['json'] }],
     properties: ['openFile']
   });
@@ -1355,18 +1491,18 @@ ipcMain.handle('import-local-data', async () => {
 });
 
 // =====================================================================
-// 👤 PROFILES & SESSIONS
+// ?? PROFILES & SESSIONS
 // =====================================================================
 
 let PROFILES_PATH;
-let profilesData = { lastUsed: null, profiles: [{ id: 'default', name: 'Default', color: '#4ea8de' }] };
+let profilesData = { lastUsed: null, profiles: [{ id: 'default', name: 'Default', color: '#8c8c8c', photo: '' }] };
 let activeProfile = null;
 const GUEST_PARTITION = 'persist:invitado';
 let guestTabCount = 0;
 
 function ensureDefaultProfile() {
   if (!profilesData.profiles.some(p => p.id === 'default')) {
-    profilesData.profiles.unshift({ id: 'default', name: 'Default', color: '#4ea8de' });
+    profilesData.profiles.unshift({ id: 'default', name: 'Default', color: '#8c8c8c', photo: '' });
   }
 }
 
@@ -1432,9 +1568,9 @@ async function cleanupGuestSession() {
     await guestSession.clearStorageData({
       storages: ['cookies', 'localstorage', 'indexdb', 'serviceworkers', 'cachestorage']
     });
-    console.log('[👤 Guest] Session cleared');
+    console.log('[?? Guest] Session cleared');
   } catch (e) {
-    console.error('[👤 Guest] Cleanup error:', e.message);
+    console.error('[?? Guest] Cleanup error:', e.message);
   }
 }
 
@@ -1469,7 +1605,7 @@ ipcMain.on('select-profile', (event, profileId) => {
 
 ipcMain.on('create-profile', (event, data) => {
   if (profilesData.profiles.find(p => p.id === data.id)) return;
-  profilesData.profiles.push({ id: data.id, name: data.name, color: data.color || '#4ea8de' });
+  profilesData.profiles.push({ id: data.id, name: data.name, color: data.color || '#8c8c8c' });
   saveProfiles();
   setActiveProfile(data.id);
   createTab(null, data.id);
@@ -1478,11 +1614,12 @@ ipcMain.on('create-profile', (event, data) => {
 });
 
 ipcMain.on('update-profile', (event, data) => {
-  if (!data || !data.id || data.id === 'default') return;
+  if (!data || !data.id) return;
   const profile = profilesData.profiles.find(p => p.id === data.id);
   if (!profile) return;
-  profile.name = data.name || profile.name;
-  profile.color = data.color || profile.color || '#4ea8de';
+  if (data.name !== undefined) profile.name = data.name || profile.name;
+  if (data.color !== undefined) profile.color = data.color || profile.color || '#8c8c8c';
+  if (data.photo !== undefined) profile.photo = data.photo;
   saveProfiles();
   broadcastProfiles();
   if (activeProfile === data.id) {
@@ -1498,6 +1635,23 @@ ipcMain.on('delete-profile', (event, profileId) => {
   saveProfiles();
   mainWindow.webContents.send('profile-deleted', { profileId });
   broadcastProfiles();
+});
+
+ipcMain.handle('select-profile-photo', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Select profile photo',
+    filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'] }],
+    properties: ['openFile']
+  });
+  if (result.canceled || result.filePaths.length === 0) return null;
+  try {
+    const data = fs.readFileSync(result.filePaths[0]);
+    const ext = path.extname(result.filePaths[0]).slice(1).toLowerCase();
+    const mime = ext === 'jpg' ? 'jpeg' : ext;
+    return `data:image/${mime};base64,${data.toString('base64')}`;
+  } catch (e) {
+    return null;
+  }
 });
 
 ipcMain.on('start-guest', () => {
@@ -1521,11 +1675,50 @@ ipcMain.on('start-guest', () => {
 });
 
 // =====================================================================
-// 📥 DOWNLOAD MANAGER
+// ?? DOWNLOAD MANAGER
 // =====================================================================
 
 const activeDownloads = new Map();
 let downloadsWindow = null;
+let shortcutWindow = null;
+
+function openShortcutWindow(kind) {
+  if (shortcutWindow && !shortcutWindow.isDestroyed()) {
+    shortcutWindow.focus();
+    return;
+  }
+
+  shortcutWindow = new BrowserWindow({
+    width: 400,
+    height: 280,
+    parent: mainWindow,
+    modal: true,
+    frame: false,
+    backgroundColor: '#1a1a1a',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      backgroundThrottling: false
+    }
+  });
+
+  shortcutWindow.loadFile(path.join(__dirname, 'ui', 'sidebar-shortcut.html'), {
+    query: { context: kind }
+  });
+
+  shortcutWindow.setMenuBarVisibility(false);
+
+  shortcutWindow.on('closed', () => {
+    shortcutWindow = null;
+  });
+}
+
+function closeShortcutWindow(kind) {
+  if (shortcutWindow && !shortcutWindow.isDestroyed()) {
+    shortcutWindow.close();
+  }
+}
 
 function broadcastToDownloads(channel, data) {
   if (downloadsWindow && !downloadsWindow.isDestroyed() && downloadsWindow.webContents) {
@@ -1729,8 +1922,13 @@ ipcMain.on('close-downloads-window', () => {
   }
 });
 
+ipcMain.on('open-sidebar-shortcut-window', () => openShortcutWindow('sidebar'));
+ipcMain.on('open-home-shortcut-window', () => openShortcutWindow('home'));
+ipcMain.on('close-sidebar-shortcut-window', () => closeShortcutWindow('sidebar'));
+ipcMain.on('close-home-shortcut-window', () => closeShortcutWindow('home'));
+
 // =====================================================================
-// 🔮 SUGGESTIONS — Google Suggest API
+// ?? SUGGESTIONS � Google Suggest API
 // =====================================================================
 
 ipcMain.on('get-suggestions', (event, query) => {
@@ -1774,7 +1972,7 @@ ipcMain.on('get-suggestions', (event, query) => {
 });
 
 // =====================================================================
-// 🛡️ NEUTRON SHIELD
+// ??? NEUTRON SHIELD
 // =====================================================================
 
 ipcMain.on('show-context-menu', (event, data = {}) => {
@@ -1994,7 +2192,7 @@ function initNetworkShield() {
 
   setInterval(() => {
     if (SHIELD_CONFIG.blockedCount > 0) {
-      console.log(`[🛡️ Shield] ${SHIELD_CONFIG.blockedCount} requests blocked`);
+      console.log(`[??? Shield] ${SHIELD_CONFIG.blockedCount} requests blocked`);
       broadcastShieldStats();
     }
   }, 60000);
@@ -2030,6 +2228,62 @@ function registerShieldForPartition(partitionName) {
     console.error('[Shield] Partition register error:', e.message);
   }
 }
+
+ipcMain.handle('get-app-metrics', async () => {
+  const metrics = app.getAppMetrics();
+  const tabPidMap = {};
+  tabs.forEach(t => {
+    if (t.view && t.view.webContents && !t.view.webContents.isDestroyed()) {
+      try {
+        const pid = t.view.webContents.getOSProcessId();
+        tabPidMap[pid] = t.title || t.url || 'New tab';
+      } catch (e) {}
+    }
+  });
+
+  return metrics.map(m => {
+    const mType = (m.type || '').toLowerCase();
+    let name = 'System Process';
+    let type = m.type;
+
+    if (mType === 'browser' || mType === 'main') {
+      name = 'Neutron (Main Process)';
+      type = 'Main';
+    } else if (mType === 'gpu-process' || mType === 'gpu') {
+      name = 'Graphics Accelerator (GPU)';
+      type = 'GPU';
+    } else if (mType === 'renderer') {
+      type = 'tab';
+      name = tabPidMap[m.pid] || 'Browser Tab';
+    } else if (mType === 'utility') {
+      name = 'Network Service / Utility';
+      type = 'Utility';
+    } else if (mType === 'zygote') {
+      name = 'Startup Process (Zygote)';
+      type = 'Zygote';
+    } else if (mType === 'sandbox-helper') {
+      name = 'Security Helper (Sandbox)';
+      type = 'Sandbox';
+    }
+
+    return {
+      pid: m.pid,
+      type: type,
+      name: name,
+      cpu: m.cpu.percentCPUUsage,
+      memory: m.memory.privateBytes || m.memory.workingSetSize
+    };
+  });
+});
+
+ipcMain.on('kill-process', (event, pid) => {
+  try {
+    process.kill(pid);
+    console.log(`[? Process Manager] Force-killed PID: ${pid}`);
+  } catch (e) {
+    console.error(`[? Process Manager] Failed to kill PID ${pid}:`, e.message);
+  }
+});
 
 ipcMain.handle('get-shield-config', () => {
   return { ...SHIELD_CONFIG, blockedCount: SHIELD_CONFIG.blockedCount };
@@ -2069,7 +2323,7 @@ loadNeutronConfig();
 
 if (neutronConfig.disableHardwareAcceleration) {
   app.disableHardwareAcceleration();
-  console.log('[⚙️] Hardware acceleration disabled');
+  console.log('[??] Hardware acceleration disabled');
 }
 
 initShieldConfig();
@@ -2089,7 +2343,7 @@ if (!fs.existsSync(CONFIG_PATH)) {
 function forceGarbageCollection() {
   if (global.gc) {
     global.gc();
-    console.log('[⚡ GC] Forced garbage collection');
+    console.log('[? GC] Forced garbage collection');
   }
 }
 
@@ -2102,7 +2356,7 @@ powerMonitor.on('on-battery', () => {
     neutronConfig.energySaver = true;
     saveNeutronConfig();
     applyEnergySaverToTabs();
-    console.log('[⚡ Energy Saver] Auto-activated — on battery');
+    console.log('[? Energy Saver] Auto-activated � on battery');
   }
 });
 
@@ -2111,7 +2365,7 @@ powerMonitor.on('on-ac', () => {
     neutronConfig.energySaver = false;
     saveNeutronConfig();
     applyEnergySaverToTabs();
-    console.log('[⚡ Energy Saver] Deactivated — on AC');
+    console.log('[? Energy Saver] Deactivated � on AC');
   }
 });
 
@@ -2129,9 +2383,9 @@ app.whenReady().then(async () => {
   applyWebRTCConfig();
   broadcastShieldStats();
 
-  // ⚡ FIRST LAUNCH CHECK
+  // ? FIRST LAUNCH CHECK
   if (neutronConfig.firstLaunch === true) {
-    console.log('[⚙️] First launch detected. Showing onboarding screen...');
+    console.log('[??] First launch detected. Showing onboarding screen...');
     createOnboardingWindow();
 
     // Wait for onboarding to complete (Promise resolves in IPC handler)
@@ -2139,7 +2393,7 @@ app.whenReady().then(async () => {
       onboardingResolve = resolve;
     });
 
-    console.log('[⚙️] Onboarding completed, proceeding with app initialization...');
+    console.log('[??] Onboarding completed, proceeding with app initialization...');
   }
 
   // Create main browser window (after onboarding or if not first launch)
@@ -2174,7 +2428,7 @@ app.whenReady().then(async () => {
   setInterval(() => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       const metrics = app.getAppMetrics();
-      const totalMemoryKb = metrics.reduce((sum, m) => sum + m.memory.workingSetSize, 0);
+      const totalMemoryKb = metrics.reduce((sum, m) => sum + (m.memory.privateBytes || m.memory.workingSetSize), 0);
       const totalMemoryMb = Math.round(totalMemoryKb / 1024);
       mainWindow.webContents.send('ram-usage-updated', totalMemoryMb);
     }
@@ -2184,9 +2438,9 @@ app.whenReady().then(async () => {
 });
 
 app.on('window-all-closed', async () => {
-  // Prevent app.quit() during onboarding → main window transition
+  // Prevent app.quit() during onboarding ? main window transition
   if (isSwitchingFromOnboarding) {
-    console.log('[⚙️] window-all-closed suppressed — switching from onboarding to main window');
+    console.log('[??] window-all-closed suppressed � switching from onboarding to main window');
     isSwitchingFromOnboarding = false;
     return;
   }

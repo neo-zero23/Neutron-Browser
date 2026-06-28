@@ -54,7 +54,7 @@ async function renderHistory() {
 
     item.addEventListener('click', (e) => {
       if (e.target.closest('.history-delete-btn')) return;
-      window.api.navigateTo(entry.url);
+      window.api.createTab({ url: entry.url, profile: 'default' });
     });
 
     item.querySelector('.history-delete-btn').addEventListener('click', (e) => {
@@ -71,7 +71,7 @@ async function renderHistory() {
 }
 
 closeHistoryBtn.addEventListener('click', () => {
-  window.api.closeHistoryWindow();
+  window.api.closeCurrentTab();
 });
 
 clearHistoryBtn.addEventListener('click', () => {

@@ -263,7 +263,7 @@
 
     <div class="search-wrapper">
       <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Buscar o escribir URL..." autocomplete="off"
+        <input type="text" id="search-input" placeholder="Search or type URL..." autocomplete="off"
           spellcheck="false">
         <ul id="search-suggestions" class="search-suggestions"></ul>
         <button id="search-btn">Search</button>
@@ -311,6 +311,36 @@
     }
   </style>
 
+  <style>
+    /* Botón añadir circular */
+    .shortcut.add-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+    .shortcut-add-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px dashed var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+    .shortcut.add-btn:hover .shortcut-add-circle {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      background: color-mix(in srgb, var(--accent-blue) 10%, transparent);
+      transform: scale(1.05);
+    }
+  </style>
+
   <script src="i18n.js"></script>
   <script>
     const homeCtxMenu = document.getElementById('home-ctx-menu');
@@ -318,8 +348,12 @@
 
     function applyHomeTheme(theme, accentColor) {
       document.body.classList.remove('theme-dark', 'theme-light');
-      document.body.classList.add(theme === 'light' ? 'theme-light' : 'theme-dark');
-      const color = accentColor || '#5ba3d1';
+      const resolvedTheme = theme === 'light' ? 'light' : 'dark';
+      document.body.classList.add(resolvedTheme === 'light' ? 'theme-light' : 'theme-dark');
+      const DEFAULT_DARK_ACCENT = '#8c8c8c';
+      const DEFAULT_LIGHT_ACCENT = '#1a1a1e';
+      const rawColor = accentColor || DEFAULT_DARK_ACCENT;
+      const color = (rawColor === DEFAULT_DARK_ACCENT && resolvedTheme === 'light') ? DEFAULT_LIGHT_ACCENT : rawColor;
       document.documentElement.style.setProperty('--accent-blue-current', color);
       document.documentElement.style.setProperty('--accent-blue', color);
       document.documentElement.style.setProperty('--search-border', color);
@@ -506,18 +540,28 @@
     }
 
     function loadFavicon(imgEl, domain, size) {
-      const url = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=${size || 16}` : '';
-      if (!url) {
+      if (!domain) {
         imgEl.src = FALLBACK_FAVICON;
         imgEl.classList.add('loaded');
         return;
       }
+      const sources = [
+        `https://icon.horse/icon/${domain}`,
+        `https://www.google.com/s2/favicons?domain=${domain}&sz=${size || 16}`,
+        `https://${domain}/favicon.ico`
+      ];
+      let idx = 0;
+      function tryNext() {
+        if (idx >= sources.length) {
+          imgEl.src = FALLBACK_FAVICON;
+          imgEl.classList.add('loaded');
+          return;
+        }
+        imgEl.src = sources[idx++];
+      }
       imgEl.onload = () => imgEl.classList.add('loaded');
-      imgEl.onerror = () => {
-        imgEl.src = FALLBACK_FAVICON;
-        imgEl.classList.add('loaded');
-      };
-      imgEl.src = url;
+      imgEl.onerror = tryNext;
+      tryNext();
     }
 
     function renderHomeShortcuts(data) {
@@ -550,6 +594,21 @@
         grid.appendChild(a);
         loadFavicon(img, item.domain || extractDomain(item.url), 64);
       });
+
+      // Añadir botón "+" circular al final de la cuadrícula
+      const addBtn = document.createElement('a');
+      addBtn.className = 'shortcut add-btn';
+      addBtn.innerHTML = `
+        <div class="shortcut-add-circle">+</div>
+        <span data-i18n="add">Add</span>
+      `;
+      addBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (window.api && window.api.openHomeShortcutWindow) {
+          window.api.openHomeShortcutWindow();
+        }
+      });
+      grid.appendChild(addBtn);
     }
 
     document.getElementById('home-ctx-remove').addEventListener('click', () => {
@@ -570,6 +629,33 @@
     });
     window.api.onBookmarksUpdated(data => {
       renderHomeShortcuts(data);
+    });
+
+    // Konami Code Easter Egg inside home.html
+    const konamiCode = [
+      'arrowup', 'arrowup', 
+      'arrowdown', 'arrowdown', 
+      'arrowleft', 'arrowright', 
+      'arrowleft', 'arrowright', 
+      'b', 'a'
+    ];
+    let konamiIndex = 0;
+
+    window.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      const requiredKey = konamiCode[konamiIndex];
+
+      if (key === requiredKey) {
+        konamiIndex++;
+        if (konamiIndex === konamiCode.length) {
+          console.log('[🎮] Konami Code Activated on Home page!');
+          window.api.navigateTo('neutron admin.task');
+          konamiIndex = 0;
+        }
+      } else {
+        const firstKey = konamiCode[0];
+        konamiIndex = (key === firstKey) ? 1 : 0;
+      }
     });
   </script>
 </body>

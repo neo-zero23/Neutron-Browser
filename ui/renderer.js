@@ -8,7 +8,7 @@ const tabData = {}; // Maps tabId -> { url, title, profile }
 let activeProfile = null;
 let profilesList = [];
 let currentThemePreference = 'dark';
-let currentAccentColor = '#4ea8de';
+let currentAccentColor = '#8c8c8c';
 let themeMediaQuery = null;
 let themeMediaListener = null;
 
@@ -20,7 +20,6 @@ const winClose = document.getElementById('win-close');
 const navBack = document.getElementById('nav-back');
 const navForward = document.getElementById('nav-forward');
 const navReload = document.getElementById('nav-reload');
-const navGo = document.getElementById('nav-go');
 const urlInput = document.getElementById('url-input');
 const suggestionsList = document.getElementById('suggestions-list');
 const loadingProgress = document.getElementById('loading-progress');
@@ -35,8 +34,8 @@ const ramFill = document.getElementById('ram-fill');
 const ramText = document.getElementById('ram-text');
 const panicBtn = document.getElementById('panic-btn');
 const toggleSidebar = document.getElementById('toggle-sidebar');
-const settingsBtn = document.getElementById('settings-btn');
-const historyBtn = document.getElementById('history-btn');
+const quickSettingsBtn = document.getElementById('quick-settings-btn');
+const quickSettingsDropdown = document.getElementById('quick-settings-dropdown');
 const mainLayout = document.getElementById('main-layout');
 const toggleIconOpen = document.getElementById('toggle-icon-open');
 const toggleIconClosed = document.getElementById('toggle-icon-closed');
@@ -45,7 +44,9 @@ let currentLanguage = 'es';
 
 // Profile elements
 const profileIndicator = document.getElementById('profile-indicator');
-const profileIndicatorName = document.getElementById('profile-indicator-name');
+const profileAvatar = document.getElementById('profile-avatar');
+const profileAvatarText = document.getElementById('profile-avatar-text');
+const profileAvatarImg = document.getElementById('profile-avatar-img');
 const profileDropdown = document.getElementById('profile-dropdown');
 const profileDropdownList = document.getElementById('profile-dropdown-list');
 const newProfileBtn = document.getElementById('new-profile-btn');
@@ -59,6 +60,17 @@ const newProfileNameInput = document.getElementById('new-profile-name');
 const newProfileColorInput = document.getElementById('new-profile-color');
 const cancelProfileBtn = document.getElementById('cancel-profile-btn');
 const confirmProfileBtn = document.getElementById('confirm-profile-btn');
+const profileEditModal = document.getElementById('profile-edit-modal');
+const profileEditAvatar = document.getElementById('profile-edit-avatar');
+const profileEditAvatarText = document.getElementById('profile-edit-avatar-text');
+const profileEditAvatarImg = document.getElementById('profile-edit-avatar-img');
+const profileEditName = document.getElementById('profile-edit-name');
+const profileEditColor = document.getElementById('profile-edit-color');
+const profileEditSave = document.getElementById('profile-edit-save');
+const profileEditCancel = document.getElementById('profile-edit-cancel');
+const profileEditDelete = document.getElementById('profile-edit-delete');
+const profileEditRemovePhoto = document.getElementById('profile-edit-remove-photo');
+let editingProfileId = null;
 
 // --- 1. WINDOW CONTROLS ---
 winMinimize.addEventListener('click', () => window.api.minimizeWindow());
@@ -76,12 +88,6 @@ function handleNavigation() {
     window.api.navigateTo(url);
   }
 }
-
-navGo.addEventListener('click', () => {
-  const input = SuggestionManager.activeInput || 'url-input';
-  const value = document.getElementById(input)?.value.trim();
-  if (value) window.api.navigateTo(value);
-});
 
 const navHome = document.getElementById('nav-home');
 navHome.addEventListener('click', () => window.api.goHome());
@@ -102,26 +108,31 @@ function extractDomain(url) {
   }
 }
 
-function getFaviconUrl(domain, size) {
-  if (!domain) return '';
-  return `https://www.google.com/s2/favicons?domain=${domain}&sz=${size || 16}`;
-}
-
 const FALLBACK_FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2371717a'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/%3E%3C/svg%3E";
 
 function loadFavicon(imgEl, domain, size) {
-  const url = getFaviconUrl(domain, size || 16);
-  if (!url) {
+  if (!domain) {
     imgEl.src = FALLBACK_FAVICON;
     imgEl.classList.add('loaded');
     return;
   }
+  const sources = [
+    `https://icon.horse/icon/${domain}`,
+    `https://www.google.com/s2/favicons?domain=${domain}&sz=${size || 16}`,
+    `https://${domain}/favicon.ico`
+  ];
+  let idx = 0;
+  function tryNext() {
+    if (idx >= sources.length) {
+      imgEl.src = FALLBACK_FAVICON;
+      imgEl.classList.add('loaded');
+      return;
+    }
+    imgEl.src = sources[idx++];
+  }
   imgEl.onload = () => imgEl.classList.add('loaded');
-  imgEl.onerror = () => {
-    imgEl.src = FALLBACK_FAVICON;
-    imgEl.classList.add('loaded');
-  };
-  imgEl.src = url;
+  imgEl.onerror = tryNext;
+  tryNext();
 }
 
 // =====================================================================
@@ -404,20 +415,31 @@ function getProfileInfo(profileId) {
   if (profileId === 'invitado') {
     return { id: 'invitado', name: tr('chrome.guestProfile'), color: '#00FF41' };
   }
-  return profilesList.find(p => p.id === profileId) || { id: 'default', name: tr('chrome.defaultProfile'), color: '#4ea8de' };
+  return profilesList.find(p => p.id === profileId) || { id: 'default', name: tr('chrome.defaultProfile'), color: '#8c8c8c' };
 }
 
 function updateProfileIndicator(profileId) {
   activeProfile = profileId;
   const info = getProfileInfo(profileId);
-  profileIndicatorName.textContent = info.name;
+  profileIndicator.dataset.profileId = profileId;
+  profileIndicator.title = info.name;
   profileIndicator.style.borderColor = info.color + '40';
-  profileIndicator.style.color = info.color;
+
+  const color = info.color;
+  profileAvatar.style.background = color;
+  if (info.photo) {
+    profileAvatarImg.src = info.photo;
+    profileAvatarImg.style.display = 'block';
+    profileAvatarText.style.display = 'none';
+  } else {
+    profileAvatarImg.style.display = 'none';
+    profileAvatarText.style.display = 'block';
+    profileAvatarText.textContent = (info.name || '?')[0].toUpperCase();
+  }
 
   const isGuest = profileId === 'invitado';
   document.body.classList.toggle('invitado-mode', isGuest);
   document.body.classList.toggle('atomic-mode', isGuest);
-  document.getElementById('logo-text').textContent = isGuest ? tr('chrome.atomicMode') : tr('chrome.brand');
   atomicModeBtn.classList.toggle('atomic-active', isGuest);
 }
 
@@ -471,9 +493,9 @@ function renderModalProfiles() {
   });
 }
 
-function openProfileDropdown() {
+async function openProfileDropdown() {
   renderProfileDropdown();
-  window.api.hideWebview();
+  await window.api.hideWebview();
   profileDropdown.classList.remove('hidden');
 }
 
@@ -484,11 +506,8 @@ function closeProfileDropdown() {
 
 profileIndicator.addEventListener('click', (e) => {
   e.stopPropagation();
-  if (profileDropdown.classList.contains('hidden')) {
-    openProfileDropdown();
-  } else {
-    closeProfileDropdown();
-  }
+  if (activeProfile === 'invitado') return;
+  openProfileEditModal(activeProfile);
 });
 
 document.addEventListener('click', (e) => {
@@ -554,17 +573,99 @@ profileModal.querySelector('.profile-modal-backdrop').addEventListener('click', 
   window.api.showWebview();
 });
 
-// --- 6. IPC EVENT HANDLERS (BACKEND TO UI) ---
+// --- 6. PROFILE EDIT MODAL ---
+function openProfileEditModal(profileId) {
+  const info = getProfileInfo(profileId);
+  editingProfileId = profileId;
+  profileEditName.value = info.name || '';
+  profileEditColor.value = info.color || '#8c8c8c';
+  updateEditAvatar(info);
+  profileEditDelete.style.display = profileId === 'default' ? 'none' : 'block';
+  window.api.hideWebview();
+  profileEditModal.classList.remove('hidden');
+  profileEditName.focus();
+}
+
+function closeProfileEditModal() {
+  profileEditModal.classList.add('hidden');
+  window.api.showWebview();
+  editingProfileId = null;
+}
+
+function updateEditAvatar(info) {
+  const color = info.color || '#8c8c8c';
+  profileEditAvatar.style.background = color;
+  if (info.photo) {
+    profileEditAvatarImg.src = info.photo;
+    profileEditAvatarImg.style.display = 'block';
+    profileEditAvatarText.style.display = 'none';
+    profileEditRemovePhoto.style.display = 'block';
+  } else {
+    profileEditAvatarImg.style.display = 'none';
+    profileEditAvatarText.style.display = 'block';
+    profileEditAvatarText.textContent = (info.name || '?')[0].toUpperCase();
+    profileEditRemovePhoto.style.display = 'none';
+  }
+}
+
+profileEditAvatar.addEventListener('click', async () => {
+  const dataUrl = await window.api.selectProfilePhoto();
+  if (!dataUrl) return;
+  const info = getProfileInfo(editingProfileId);
+  info.photo = dataUrl;
+  updateEditAvatar(info);
+});
+
+profileEditRemovePhoto.addEventListener('click', () => {
+  const info = getProfileInfo(editingProfileId);
+  info.photo = '';
+  updateEditAvatar(info);
+});
+
+profileEditSave.addEventListener('click', () => {
+  const name = profileEditName.value.trim();
+  if (!name) return;
+  const color = profileEditColor.value;
+  const info = getProfileInfo(editingProfileId);
+  const photo = info.photo || '';
+  window.api.updateProfile({ id: editingProfileId, name, color, photo });
+  const profile = profilesList.find(p => p.id === editingProfileId);
+  if (profile) {
+    profile.name = name;
+    profile.color = color;
+    profile.photo = photo;
+  }
+  if (activeProfile === editingProfileId) {
+    updateProfileIndicator(editingProfileId);
+  }
+  closeProfileEditModal();
+});
+
+profileEditCancel.addEventListener('click', closeProfileEditModal);
+
+profileEditDelete.addEventListener('click', () => {
+  if (editingProfileId === 'default') return;
+  window.api.deleteProfile(editingProfileId);
+  closeProfileEditModal();
+});
+
+profileEditModal.querySelector('.profile-modal-backdrop').addEventListener('click', closeProfileEditModal);
+
+profileEditName.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') profileEditSave.click();
+});
+
+// --- 7. IPC EVENT HANDLERS (BACKEND TO UI) ---
 
 // Profile events
-window.api.onProfilesInitialized((data) => {
+window.api.onProfilesInitialized(async (data) => {
   profilesList = data.profiles || [];
   if (data.lastUsed) {
     updateProfileIndicator(data.lastUsed);
     profileModal.classList.add('hidden');
   } else {
     renderModalProfiles();
-    window.api.hideWebview();
+    await window.api.hideWebview();
     profileModal.classList.remove('hidden');
   }
 });
@@ -616,7 +717,7 @@ window.api.onTabCreated(({ tabId, url, title, profile, pinned }) => {
       e.stopPropagation();
       const tData = tabData[tabId];
       if (tData && tData.pinned) return; // Block closing pinned tabs
-      destruirPestaña(tabId);
+      destroyTab(tabId);
     } else {
       window.api.switchTab(tabId);
     }
@@ -649,7 +750,6 @@ window.api.onTabSwitched(({ tabId, profile }) => {
     const tabProfileInfo = getProfileInfo(tab.profile);
     document.body.classList.toggle('invitado-mode', tab.profile === 'invitado');
     document.body.classList.toggle('atomic-mode', tab.profile === 'invitado');
-    document.getElementById('logo-text').textContent = tab.profile === 'invitado' ? tr('chrome.atomicMode') : tr('chrome.brand');
     urlInput.value = tab.url || '';
   }
 });
@@ -685,10 +785,12 @@ window.api.onTabPinnedUpdated(({ tabId, pinned }) => {
 // Handle URL Changes
 window.api.onTabUrlChanged(({ tabId, url }) => {
   if (tabData[tabId]) {
-    tabData[tabId].url = url;
+    if (url !== 'about:blank' || !tabData[tabId].discarded) {
+      tabData[tabId].url = url;
+    }
   }
   if (tabId === activeTabId) {
-    urlInput.value = url;
+    urlInput.value = tabData[tabId] && tabData[tabId].discarded ? tabData[tabId].url : url;
   }
   const tabEl = document.getElementById(`tab-${tabId}`);
   if (tabEl) {
@@ -768,11 +870,67 @@ toggleSidebar.addEventListener('click', () => {
   window.api.toggleSidebar(!isHidden);
 });
 
-// --- 8. SETTINGS PAGE ---
+// --- 8. QUICK SETTINGS DROPDOWN ---
 const pathToSettings = new URL('settings.html', window.location.href).href;
-settingsBtn.addEventListener('click', () => {
-  window.api.createTab({ url: pathToSettings, profile: activeProfile || 'default' });
+const pathToHistory = new URL('history.html', window.location.href).href;
+const pathToTaskManager = 'neutron admin.task';
+
+function openQuickSettingsDropdown() {
+  const btnRect = quickSettingsBtn.getBoundingClientRect();
+  quickSettingsDropdown.style.top = (btnRect.bottom + 4) + 'px';
+  quickSettingsDropdown.style.right = '0px';
+  window.api.hideWebview();
+  quickSettingsDropdown.classList.remove('hidden');
+}
+
+function closeQuickSettingsDropdown() {
+  quickSettingsDropdown.classList.add('hidden');
+  window.api.showWebview();
+}
+
+quickSettingsBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (quickSettingsDropdown.classList.contains('hidden')) {
+    openQuickSettingsDropdown();
+  } else {
+    closeQuickSettingsDropdown();
+  }
 });
+
+quickSettingsDropdown.addEventListener('click', (e) => {
+  const item = e.target.closest('.qs-item');
+  if (!item) return;
+  const action = item.dataset.action;
+  closeQuickSettingsDropdown();
+  switch (action) {
+    case 'settings':
+      window.api.createTab({ url: pathToSettings, profile: activeProfile || 'default' });
+      break;
+    case 'history':
+      window.api.createTab({ url: pathToHistory, profile: activeProfile || 'default' });
+      break;
+    case 'taskmanager':
+      window.api.createTab({ url: pathToTaskManager, profile: activeProfile || 'default' });
+      break;
+    case 'about':
+      showAboutDialog();
+      break;
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (!quickSettingsDropdown.classList.contains('hidden') &&
+      !quickSettingsDropdown.contains(e.target) && e.target !== quickSettingsBtn) {
+    closeQuickSettingsDropdown();
+  }
+});
+
+function showAboutDialog() {
+  window.api.loadSettings().then(settings => {
+    const version = settings.appVersion || '1.0.2';
+    alert(`About Neutron\n\nNeutron Browser is an Electron.js-based web browser powered by Chromium. It was created as a personal project and later released so more people could try it. Currently, it is available only for Windows, but support for additional operating systems is planned.\n\nCurrent version: ${version}`);
+  });
+}
 
 // --- 9. INACTIVITY DETECTION — Energy Saver (30s timeout) ---
 let inactivityTimer = null;
@@ -803,8 +961,8 @@ function resetInactivityTimer() {
 
 resetInactivityTimer();
 
-// --- 10. DESTRUIR PESTAÑA — Full Lifecycle Cleanup ---
-function destruirPestaña(tabId) {
+// --- 10. DESTROY TAB — Full Lifecycle Cleanup ---
+function destroyTab(tabId) {
   const tData = tabData[tabId];
   if (tData && tData.pinned) return; // Prevent closing pinned tabs
 
@@ -836,12 +994,7 @@ window.addEventListener('contextmenu', (e) => {
   window.api.showContextMenu();
 });
 
-// --- 12. HISTORY PANEL (separate window to avoid WebContentsView z-index) ---
-historyBtn.addEventListener('click', () => {
-  window.api.openHistoryWindow();
-});
-
-// --- 13. FAVORITES ---
+// --- 12. FAVORITES ---
 const favBtn = document.getElementById('fav-btn');
 const favStar = document.getElementById('fav-star');
 
@@ -964,13 +1117,16 @@ function applyLanguage(lang) {
 
 function applyTheme(theme, accentColor) {
   currentThemePreference = theme || 'dark';
-  currentAccentColor = accentColor || currentAccentColor || '#4ea8de';
+  currentAccentColor = accentColor || currentAccentColor || '#8c8c8c';
   const resolvedTheme = theme === 'auto'
     ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
     : theme;
   document.body.classList.remove('theme-dark', 'theme-light');
   document.body.classList.add(resolvedTheme === 'light' ? 'theme-light' : 'theme-dark');
-  const color = currentAccentColor || '#4ea8de';
+  const DEFAULT_DARK_ACCENT = '#8c8c8c';
+  const DEFAULT_LIGHT_ACCENT = '#1a1a1e';
+  const rawColor = currentAccentColor || DEFAULT_DARK_ACCENT;
+  const color = (rawColor === DEFAULT_DARK_ACCENT && resolvedTheme === 'light') ? DEFAULT_LIGHT_ACCENT : rawColor;
   document.documentElement.style.setProperty('--accent-blue-current', color);
   document.documentElement.style.setProperty('--accent-blue', color);
 
@@ -1003,9 +1159,17 @@ function applyTheme(theme, accentColor) {
 
 function applySidebarVisibility(visible) {
   mainLayout.classList.toggle('sidebar-hidden', !visible);
+  toggleSidebar.style.display = visible ? '' : 'none';
   const isHidden = !visible;
   toggleIconOpen.style.display = isHidden ? 'none' : 'block';
   toggleIconClosed.style.display = isHidden ? 'block' : 'none';
+}
+
+function applyRamMeterVisibility(visible) {
+  const container = document.querySelector('.ram-meter-container');
+  const label = document.getElementById('ram-text');
+  if (container) container.style.display = visible ? 'block' : 'none';
+  if (label) label.style.display = visible ? 'block' : 'none';
 }
 
 function applyVerticalTabs(enabled) {
@@ -1035,8 +1199,9 @@ window.api.onSettingsUpdated((settings) => {
   if (settings.showHomeButton !== undefined) applyHomeButtonVisibility(settings.showHomeButton);
   if (settings.verticalTabs !== undefined) applyVerticalTabs(settings.verticalTabs);
   if (settings.showSidebar !== undefined) applySidebarVisibility(settings.showSidebar);
+  if (settings.showRamMeter !== undefined) applyRamMeterVisibility(settings.showRamMeter);
   if (settings.theme !== undefined || settings.accentColor !== undefined) {
-    applyTheme(settings.theme || 'dark', settings.accentColor || '#4ea8de');
+    applyTheme(settings.theme || 'dark', settings.accentColor || '#8c8c8c');
   }
   if (settings.forceDarkMode !== undefined) {
     // Main process handles this via applyDarkModeToAllTabs
@@ -1053,7 +1218,8 @@ if (window.api && window.api.loadSettings) {
     applyHomeButtonVisibility(settings.showHomeButton !== false);
     applyVerticalTabs(settings.verticalTabs);
     applySidebarVisibility(settings.showSidebar !== false);
-    applyTheme(settings.theme || 'dark', settings.accentColor || '#4ea8de');
+    applyRamMeterVisibility(settings.showRamMeter !== false);
+    applyTheme(settings.theme || 'dark', settings.accentColor || '#8c8c8c');
     if (settings.forceDarkMode) {
       // Dark mode applied by main process on tab creation
     }
@@ -1102,8 +1268,9 @@ function showBookmarkCtxMenu(e, type, url) {
   menu.style.top = e.clientY + 'px';
   menu.setAttribute('data-ctx-url', url);
   menu.setAttribute('data-ctx-type', type);
-  menu.classList.remove('hidden');
-  window.api.hideWebview();
+  window.api.hideWebview().then(() => {
+    menu.classList.remove('hidden');
+  });
 }
 
 function positionFavDropdown() {
@@ -1130,8 +1297,9 @@ if (favChevron && favDropdown) {
     e.stopPropagation();
     if (favDropdown.classList.contains('hidden')) {
       positionFavDropdown();
-      favDropdown.classList.remove('hidden');
-      window.api.hideWebview();
+      window.api.hideWebview().then(() => {
+        favDropdown.classList.remove('hidden');
+      });
     } else {
       dismissBookmarkOverlays();
     }
@@ -1188,3 +1356,203 @@ window.api.onBookmarksUpdated((data) => {
 });
 
 initBookmarks();
+
+// =====================================================================
+// 📌 ADD SIDEBAR SHORTCUT MODAL
+// =====================================================================
+const sidebarShortcutModal = document.getElementById('add-sidebar-shortcut-modal');
+const sidebarShortcutNameInput = document.getElementById('sidebar-shortcut-name-input');
+const sidebarShortcutUrlInput = document.getElementById('sidebar-shortcut-url-input');
+const closeSidebarModalBtn = document.getElementById('close-sidebar-modal-btn');
+const saveSidebarShortcutBtn = document.getElementById('save-sidebar-shortcut-btn');
+let sidebarShortcutKind = 'sidebar';
+
+function openSidebarShortcutModal(kind = 'sidebar') {
+  sidebarShortcutKind = kind;
+  if (sidebarShortcutModal) sidebarShortcutModal.classList.remove('hidden');
+  if (sidebarShortcutNameInput) sidebarShortcutNameInput.value = '';
+  if (sidebarShortcutUrlInput) sidebarShortcutUrlInput.value = '';
+  const lang = (document.documentElement.lang || 'en').toLowerCase();
+  const titleEl = document.querySelector('#add-sidebar-shortcut-modal .modal-header');
+  if (titleEl) {
+    titleEl.textContent = kind === 'home'
+      ? (lang.startsWith('es') ? 'Añadir acceso rápido' : 'Add shortcut')
+      : (lang.startsWith('es') ? 'Añadir marcador lateral' : 'Add sidebar shortcut');
+  }
+  if (sidebarShortcutNameInput) sidebarShortcutNameInput.focus();
+}
+
+function closeSidebarShortcutModal() {
+  if (sidebarShortcutModal) sidebarShortcutModal.classList.add('hidden');
+  if (window.api && window.api.showWebview) {
+    window.api.showWebview();
+  }
+}
+
+const sidebarAddBtn = document.getElementById('sidebar-add-btn');
+
+if (sidebarAddBtn) {
+  sidebarAddBtn.addEventListener('click', () => {
+    if (window.api && window.api.openSidebarShortcutWindow) {
+      window.api.openSidebarShortcutWindow();
+    }
+  });
+}
+
+if (closeSidebarModalBtn) {
+  closeSidebarModalBtn.addEventListener('click', closeSidebarShortcutModal);
+}
+
+if (saveSidebarShortcutBtn && sidebarShortcutNameInput && sidebarShortcutUrlInput) {
+  saveSidebarShortcutBtn.addEventListener('click', () => {
+    const title = sidebarShortcutNameInput.value.trim();
+    let url = sidebarShortcutUrlInput.value.trim();
+    if (!title || !url) return;
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+    window.api.addBookmark({ type: sidebarShortcutKind, url, title });
+    closeSidebarShortcutModal();
+  });
+}
+
+if (sidebarShortcutModal) {
+  sidebarShortcutModal.addEventListener('click', (e) => {
+    if (e.target === sidebarShortcutModal) closeSidebarShortcutModal();
+  });
+}
+
+if (sidebarShortcutNameInput && sidebarShortcutUrlInput) {
+  sidebarShortcutNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sidebarShortcutUrlInput.focus();
+  });
+  sidebarShortcutUrlInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') saveSidebarShortcutBtn.click();
+  });
+}
+
+// =====================================================================
+// ⌨️ KEYBOARD SHORTCUTS
+// =====================================================================
+
+window.addEventListener('keydown', (e) => {
+  // F11 = Fullscreen
+  if (e.key === 'F11') {
+    e.preventDefault();
+    window.api.toggleFullscreen();
+    return;
+  }
+
+  // F12 or Ctrl+Shift+I = DevTools
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i'))) {
+    e.preventDefault();
+    window.api.toggleDevTools();
+    return;
+  }
+
+  // Zoom: Ctrl++ / Ctrl+= / Ctrl+-
+  if (e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey) {
+    if (e.key === '+' || e.key === '=') {
+      e.preventDefault();
+      window.api.zoomIn();
+      showZoomIndicator();
+      return;
+    }
+    if (e.key === '-') {
+      e.preventDefault();
+      window.api.zoomOut();
+      showZoomIndicator();
+      return;
+    }
+    if (e.key === '0') {
+      e.preventDefault();
+      window.api.zoomReset();
+      showZoomIndicator();
+      return;
+    }
+  }
+});
+
+// Fullscreen UI toggle
+window.api.onFullscreenChanged((isFullscreen) => {
+  document.body.classList.toggle('fullscreen', isFullscreen);
+});
+
+// =====================================================================
+// 🔍 ZOOM INDICATOR
+// =====================================================================
+
+let zoomIndicatorTimeout = null;
+
+function showZoomIndicator(percent) {
+  const el = document.getElementById('zoom-indicator');
+  if (!el) return;
+  el.style.display = 'inline-block';
+  el.classList.add('visible');
+  clearTimeout(zoomIndicatorTimeout);
+  zoomIndicatorTimeout = setTimeout(() => {
+    el.classList.remove('visible');
+    setTimeout(() => { el.style.display = 'none'; }, 200);
+  }, 2000);
+}
+
+window.api.onZoomChanged(({ tabId, level, percent }) => {
+  if (tabId !== activeTabId) return;
+  const el = document.getElementById('zoom-indicator');
+  if (el) el.textContent = percent + '%';
+  showZoomIndicator();
+});
+
+// =====================================================================
+// 🗑️ TAB DISCARDING UI
+// =====================================================================
+
+window.api.onTabDiscarded(({ tabId, url, title }) => {
+  const tabEl = document.getElementById(`tab-${tabId}`);
+  if (tabEl) {
+    tabEl.classList.add('discarded');
+    tabEl.setAttribute('title', title + ' (' + url + ') - ' + tr('chrome.discarded'));
+  }
+  if (tabData[tabId]) {
+    tabData[tabId].discarded = true;
+    tabData[tabId].url = url; // Keep displaying original URL
+  }
+});
+
+window.api.onTabRestored(({ tabId }) => {
+  const tabEl = document.getElementById(`tab-${tabId}`);
+  if (tabEl) {
+    tabEl.classList.remove('discarded');
+    tabEl.setAttribute('title', '');
+  }
+  if (tabData[tabId]) {
+    tabData[tabId].discarded = false;
+  }
+});
+
+// 🎮 EASTER EGG: KONAMI CODE (↑ ↑ ↓ ↓ ← → ← → B A) -> Open Task Manager
+const konamiCode = [
+  'ArrowUp', 'ArrowUp', 
+  'ArrowDown', 'ArrowDown', 
+  'ArrowLeft', 'ArrowRight', 
+  'ArrowLeft', 'ArrowRight', 
+  'b', 'a'
+];
+let konamiIndex = 0;
+
+window.addEventListener('keydown', (e) => {
+  const key = e.key.toLowerCase();
+  const requiredKey = konamiCode[konamiIndex].toLowerCase();
+
+  if (key === requiredKey) {
+    konamiIndex++;
+    if (konamiIndex === konamiCode.length) {
+      console.log('[🎮] Konami Code Activated! Opening Process Manager...');
+      window.api.createTab({ url: 'neutron admin.task', profile: activeProfile || 'default' });
+      konamiIndex = 0;
+    }
+  } else {
+    const firstKey = konamiCode[0].toLowerCase();
+    konamiIndex = (key === firstKey) ? 1 : 0;
+  }
+});

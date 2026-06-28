@@ -6,45 +6,19 @@ let selectedLanguage = 'es';
 let selectedTheme = 'dark';
 
 /**
- * Initialize i18n strings in the DOM
- * Fallback to hardcoded Spanish/English if i18n not available
+ * Use shared NeutronI18n for translations
  */
-const i18nStrings = {
-  es: {
-    'onboarding.title': 'Bienvenido a Neutron',
-    'onboarding.subtitle': 'Navegador rápido, privado y optimizado',
-    'onboarding.selectLanguage': 'Selecciona tu idioma',
-    'onboarding.selectTheme': 'Elige tu tema',
-    'onboarding.spanish': 'Español',
-    'onboarding.english': 'English',
-    'onboarding.darkTheme': 'Oscuro',
-    'onboarding.lightTheme': 'Claro',
-    'onboarding.start': 'Comenzar',
-    'onboarding.canChangeAnytime': 'Puedes cambiar esto después en configuración'
-  },
-  en: {
-    'onboarding.title': 'Welcome to Neutron',
-    'onboarding.subtitle': 'Fast, private, and optimized browser',
-    'onboarding.selectLanguage': 'Select your language',
-    'onboarding.selectTheme': 'Choose your theme',
-    'onboarding.spanish': 'Spanish',
-    'onboarding.english': 'English',
-    'onboarding.darkTheme': 'Dark',
-    'onboarding.lightTheme': 'Light',
-    'onboarding.start': 'Get Started',
-    'onboarding.canChangeAnytime': 'You can change this later in settings'
-  }
-};
+const I18N = window.NeutronI18n;
 
 /**
- * Translate UI strings
+ * Translate UI strings via NeutronI18n
  */
 function translateUI(language) {
-  const strings = i18nStrings[language] || i18nStrings['es'];
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    if (strings[key]) {
-      el.textContent = strings[key];
+    const translated = I18N ? I18N.t(language, key) : key;
+    if (translated) {
+      el.textContent = translated;
     }
   });
 }

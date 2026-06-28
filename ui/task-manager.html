@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Process Manager - Neutron</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg: #0d0d0e;
+      --card-bg: rgba(22, 22, 26, 0.7);
+      --border-color: rgba(255, 255, 255, 0.05);
+      --text-primary: #e4e4e7;
+      --text-secondary: #a1a1aa;
+      --accent-blue: #8c8c8c;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-primary);
+      padding: 30px;
+      overflow-y: auto;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+      background-size: 30px 30px;
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .header-title h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title h1 span {
+      color: var(--accent-blue);
+    }
+
+    .header-title p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .metrics-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .metric-card-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .metric-card-value {
+      font-size: 24px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      margin-top: 6px;
+      color: var(--accent-blue);
+    }
+
+    .task-table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      padding: 14px 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    td {
+      padding: 14px 20px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .process-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
+    }
+
+    .process-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-main {
+      background: rgba(78, 168, 222, 0.15);
+      color: var(--accent-blue);
+    }
+
+    .badge-gpu {
+      background: rgba(168, 85, 247, 0.15);
+      color: #a855f7;
+    }
+
+    .badge-tab {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+    }
+
+    .badge-other {
+      background: rgba(113, 113, 122, 0.15);
+      color: var(--text-secondary);
+    }
+
+    .kill-btn {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--accent-red);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .kill-btn:hover {
+      background: var(--accent-red);
+      color: #fff;
+      border-color: var(--accent-red);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-title">
+        <h1><span>⚡</span> <span id="task-manager-title">Process Manager</span></h1>
+        <p id="task-manager-subtitle">Real-time resource monitoring and control</p>
+      </div>
+    </header>
+
+    <div class="metrics-summary">
+      <div class="metric-card">
+        <div class="metric-card-label" data-i18n="totalMemory">Total Memory</div>
+        <div class="metric-card-value" id="summary-ram">0 MB</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-label" data-i18n="activeProcesses">Active Processes</div>
+        <div class="metric-card-value" id="summary-procs">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-label" data-i18n="totalCpu">Total CPU (App)</div>
+        <div class="metric-card-value" id="summary-cpu">0%</div>
+      </div>
+    </div>
+
+    <div class="task-table-container">
+      <table id="task-manager-table">
+        <thead>
+          <tr>
+            <th data-i18n="processTab">Process / Tab</th>
+            <th>PID</th>
+            <th data-i18n="cpuUsage">CPU Usage</th>
+            <th data-i18n="memoryRam">RAM Memory</th>
+            <th data-i18n="action">Action</th>
+          </tr>
+        </thead>
+        <tbody id="task-list-body">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script>
+    const I18N = window.NeutronI18n;
+    let currentLanguage = 'en';
+
+    function t(path) {
+      return I18N ? I18N.t(currentLanguage, path) : path;
+    }
+
+    function applyLanguage(lang) {
+      currentLanguage = I18N ? I18N.normalize(lang) : (lang || 'en');
+      if (I18N) I18N.applyTaskManagerPage(currentLanguage);
+    }
+
+    if (window.api && window.api.loadSettings) {
+      window.api.loadSettings().then(config => {
+        applyLanguage(config.language || 'en');
+      });
+    }
+
+    // Communication with Main Process
+    function updateStats() {
+      if (window.api && window.api.getAppMetrics) {
+        window.api.getAppMetrics().then(metrics => {
+          renderTable(metrics);
+        });
+      }
+    }
+
+    function getProcessBadge(type) {
+      const t = (type || '').toLowerCase();
+      if (t === 'main')    return '<span class="process-badge badge-main">Main</span>';
+      if (t === 'gpu')     return '<span class="process-badge badge-gpu">GPU</span>';
+      if (t === 'tab')     return '<span class="process-badge badge-tab">Tab</span>';
+      if (t === 'utility') return '<span class="process-badge badge-other">Service</span>';
+      if (t === 'zygote')  return '<span class="process-badge badge-other">Zygote</span>';
+      if (t === 'sandbox') return '<span class="process-badge badge-other">Sandbox</span>';
+      return `<span class="process-badge badge-other">${type}</span>`;
+    }
+
+    function renderTable(metrics) {
+      const tbody = document.getElementById('task-list-body');
+      tbody.innerHTML = '';
+
+      let totalRam = 0;
+      let totalCpu = 0;
+      let count = metrics.length;
+
+      metrics.forEach(proc => {
+        const tr = document.createElement('tr');
+        const ramMb = Math.round(proc.memory / 1024);
+        totalRam += ramMb;
+        totalCpu += proc.cpu;
+
+        tr.innerHTML = `
+          <td>
+            <div class="process-name-cell">
+              ${getProcessBadge(proc.type)}
+              <span>${proc.name}</span>
+            </div>
+          </td>
+          <td style="color:var(--text-secondary);font-family:monospace;">${proc.pid}</td>
+          <td style="font-weight: 600; color: ${proc.cpu > 20 ? 'var(--accent-red)' : 'var(--text-primary)'}">${proc.cpu.toFixed(1)}%</td>
+          <td style="font-weight: 600; color: var(--accent-blue);">${ramMb} MB</td>
+          <td>
+            ${proc.type !== 'Main' ? `<button class="kill-btn" onclick="killProcess(${proc.pid})">Kill</button>` : '<span style="color:var(--text-secondary);font-size:11px;">Protected</span>'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('summary-ram').textContent = `${totalRam} MB`;
+      document.getElementById('summary-procs').textContent = count;
+      document.getElementById('summary-cpu').textContent = `${totalCpu.toFixed(1)}%`;
+    }
+
+    function killProcess(pid) {
+      if (window.api && window.api.killProcess) {
+        window.api.killProcess(pid);
+        setTimeout(updateStats, 100);
+      }
+    }
+
+    // Refresh every 2 seconds
+    setInterval(updateStats, 2000);
+    updateStats();
+  </script>
+</body>
+</html>

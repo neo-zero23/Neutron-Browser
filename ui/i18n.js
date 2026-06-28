@@ -22,7 +22,7 @@
         title: 'Neutron Browser',
         brand: 'Neutron',
         atomicMode: 'ATOMIC MODE',
-        defaultProfile: 'Default',
+        defaultProfile: 'Predeterminado',
         guestProfile: 'Invitado',
         customBrowsing: 'Navegación personalizada',
         newTab: 'Nueva pestaña',
@@ -31,6 +31,8 @@
         pinTab: 'Fijar pestaña',
         unpinTab: 'Desfijar pestaña',
         closeOtherTabs: 'Cerrar otras pestañas',
+        discardTab: 'Descartar pestaña',
+        discarded: 'Descartada',
         pinnedTab: 'Pestaña fijada',
         back: 'Atrás',
         forward: 'Adelante',
@@ -41,6 +43,14 @@
         favorites: 'Favoritos',
         addToFavorites: 'Añadir a favoritos',
         addToSidebar: 'Añadir a Sidebar',
+        addSidebarShortcut: 'Añadir marcador lateral',
+        sidebarShortcutTitle: 'Añadir marcador lateral',
+        sidebarShortcutName: 'Nombre',
+        sidebarShortcutNamePlaceholder: 'Ej. Twitch',
+        sidebarShortcutUrl: 'URL (Dirección web)',
+        sidebarShortcutUrlPlaceholder: 'Ej. https://twitch.tv',
+        sidebarShortcutCancel: 'Cancelar',
+        sidebarShortcutSave: 'Guardar',
         addToHome: 'Añadir a Inicio',
         changeProfile: 'Cambiar perfil',
         newProfile: '+ Nuevo perfil',
@@ -50,6 +60,11 @@
         cancel: 'Cancelar',
         create: 'Crear',
         deleteProfile: 'Eliminar perfil',
+        editProfile: 'Editar perfil',
+        save: 'Guardar',
+        changePhoto: 'Cambiar foto',
+        removePhoto: 'Eliminar foto',
+        profileName: 'Nombre',
         removeBookmark: 'Eliminar marcador',
         welcome: 'Bienvenido a Neutron',
         chooseProfile: 'Elige un perfil para empezar',
@@ -64,7 +79,10 @@
         panic: 'Botón de Pánico',
         clearCache: 'Limpiar Caché y RAM',
         showSidebar: 'Ocultar/Mostrar barra lateral',
-        tabTitleDefault: 'Nueva pestaña'
+        tabTitleDefault: 'Nueva pestaña',
+        loading: 'Cargando...',
+        taskManager: 'Administrador de tareas',
+        about: 'Acerca de Neutron'
       },
       home: {
         title: 'Neutron',
@@ -76,7 +94,7 @@
       settings: {
         title: 'Configuración',
         header: 'Configuración',
-        version: 'Neutron Browser v2.0.0',
+        version: 'Neutron Browser v1.0.2',
         tabs: ['General', 'Búsqueda', 'Privacidad', 'Escudo', 'Apariencia', 'Personalización', 'Rendimiento'],
         general: [
           ['Hibernación Inteligente', 'Suspende pestañas inactivas en segundo plano'],
@@ -100,6 +118,7 @@
           ['Tema de Interfaz', 'Oscuro / Claro para el navegador'],
           ['Modo Oscuro Forzado', 'Fuerza tema oscuro en todos los sitios web'],
           ['Pestañas Verticales', 'Ubica las pestañas en una barra lateral vertical'],
+          ['Medidor de RAM', 'Muestra el uso de memoria RAM en la barra lateral'],
           ['Color de Acento', 'Color principal del navegador'],
           ['Densidad de Interfaz', 'Ajusta el espaciado de la barra y pestañas']
         ],
@@ -151,7 +170,22 @@
         languageOptionEs: 'Español',
         languageOptionEn: 'English',
         languageOptionPt: 'Português',
-        languageOptionFr: 'Français'
+        languageOptionFr: 'Français',
+        accentColors: {
+          gray: 'Gris',
+          blue: 'Azul',
+          deepBlue: 'Azul intenso',
+          purple: 'Púrpura',
+          green: 'Verde',
+          red: 'Rojo',
+          amber: 'Ámbar',
+          orange: 'Naranja'
+        },
+        density: {
+          compact: 'Compacta',
+          comfortable: 'Cómoda',
+          spacious: 'Espaciosa'
+        }
       },
       history: {
         clearAll: 'Borrar todo',
@@ -185,6 +219,22 @@
         autoTheme: 'Automático',
         start: 'Comenzar',
         canChangeAnytime: 'Puedes cambiar esto después en configuración'
+      },
+      taskManager: {
+        title: 'Administrador de Procesos',
+        subtitle: 'Monitoreo y control de recursos en tiempo real',
+        totalMemory: 'Memoria Total',
+        activeProcesses: 'Procesos Activos',
+        totalCpu: 'CPU Total (App)',
+        processTab: 'Proceso / Pestaña',
+        cpuUsage: 'Uso de CPU',
+        memoryRam: 'Memoria RAM',
+        action: 'Acción',
+        badgeMain: 'Principal',
+        badgeTab: 'Pestaña',
+        badgeService: 'Servicio',
+        kill: 'Finalizar',
+        protected: 'Protegido'
       }
     },
     en: {
@@ -212,6 +262,8 @@
         pinTab: 'Pin tab',
         unpinTab: 'Unpin tab',
         closeOtherTabs: 'Close other tabs',
+        discardTab: 'Discard tab',
+        discarded: 'Discarded',
         pinnedTab: 'Pinned tab',
         back: 'Back',
         forward: 'Forward',
@@ -222,6 +274,14 @@
         favorites: 'Favorites',
         addToFavorites: 'Add to favorites',
         addToSidebar: 'Add to Sidebar',
+        addSidebarShortcut: 'Add sidebar shortcut',
+        sidebarShortcutTitle: 'Add sidebar shortcut',
+        sidebarShortcutName: 'Name',
+        sidebarShortcutNamePlaceholder: 'e.g. Twitch',
+        sidebarShortcutUrl: 'URL (web address)',
+        sidebarShortcutUrlPlaceholder: 'e.g. https://twitch.tv',
+        sidebarShortcutCancel: 'Cancel',
+        sidebarShortcutSave: 'Save',
         addToHome: 'Add to Home',
         changeProfile: 'Change profile',
         newProfile: '+ New profile',
@@ -231,6 +291,11 @@
         cancel: 'Cancel',
         create: 'Create',
         deleteProfile: 'Delete profile',
+        editProfile: 'Edit profile',
+        save: 'Save',
+        changePhoto: 'Change photo',
+        removePhoto: 'Remove photo',
+        profileName: 'Name',
         removeBookmark: 'Remove bookmark',
         welcome: 'Welcome to Neutron',
         chooseProfile: 'Choose a profile to start',
@@ -245,7 +310,10 @@
         panic: 'Panic button',
         clearCache: 'Clear Cache and RAM',
         showSidebar: 'Show/Hide sidebar',
-        tabTitleDefault: 'New tab'
+        tabTitleDefault: 'New tab',
+        loading: 'Loading...',
+        taskManager: 'Task Manager',
+        about: 'About Neutron'
       },
       home: {
         title: 'Neutron',
@@ -257,7 +325,7 @@
       settings: {
         title: 'Settings',
         header: 'Settings',
-        version: 'Neutron Browser v2.0.0',
+        version: 'Neutron Browser v1.0.2',
         tabs: ['General', 'Search', 'Privacy', 'Shield', 'Appearance', 'Customize', 'Performance'],
         general: [
           ['Smart Hibernation', 'Suspend inactive tabs in the background'],
@@ -281,6 +349,7 @@
           ['Interface Theme', 'Dark / Light browser theme'],
           ['Force Dark Mode', 'Force dark theme on every website'],
           ['Vertical Tabs', 'Place tabs in a vertical sidebar'],
+          ['RAM Meter', 'Show RAM usage in the sidebar'],
           ['Accent Color', 'Main browser accent color'],
           ['Interface Density', 'Adjust the spacing of the toolbar and tabs']
         ],
@@ -332,7 +401,22 @@
         languageOptionEs: 'Español',
         languageOptionEn: 'English',
         languageOptionPt: 'Português',
-        languageOptionFr: 'Français'
+        languageOptionFr: 'Français',
+        accentColors: {
+          gray: 'Gray',
+          blue: 'Blue',
+          deepBlue: 'Deep blue',
+          purple: 'Purple',
+          green: 'Green',
+          red: 'Red',
+          amber: 'Amber',
+          orange: 'Orange'
+        },
+        density: {
+          compact: 'Compact',
+          comfortable: 'Comfortable',
+          spacious: 'Spacious'
+        }
       },
       history: {
         clearAll: 'Clear all',
@@ -366,6 +450,22 @@
         autoTheme: 'Auto',
         start: 'Get Started',
         canChangeAnytime: 'You can change this later in settings'
+      },
+      taskManager: {
+        title: 'Process Manager',
+        subtitle: 'Real-time resource monitoring and control',
+        totalMemory: 'Total Memory',
+        activeProcesses: 'Active Processes',
+        totalCpu: 'Total CPU (App)',
+        processTab: 'Process / Tab',
+        cpuUsage: 'CPU Usage',
+        memoryRam: 'RAM Memory',
+        action: 'Action',
+        badgeMain: 'Main',
+        badgeTab: 'Tab',
+        badgeService: 'Service',
+        kill: 'Kill',
+        protected: 'Protected'
       }
     },
     pt: {
@@ -393,6 +493,8 @@
         pinTab: 'Fixar aba',
         unpinTab: 'Desafixar aba',
         closeOtherTabs: 'Fechar outras abas',
+        discardTab: 'Descartar aba',
+        discarded: 'Descartada',
         pinnedTab: 'Aba fixada',
         back: 'Voltar',
         forward: 'Avançar',
@@ -403,6 +505,14 @@
         favorites: 'Favoritos',
         addToFavorites: 'Adicionar aos favoritos',
         addToSidebar: 'Adicionar à Sidebar',
+        addSidebarShortcut: 'Adicionar atalho lateral',
+        sidebarShortcutTitle: 'Adicionar atalho lateral',
+        sidebarShortcutName: 'Nome',
+        sidebarShortcutNamePlaceholder: 'Ex. Twitch',
+        sidebarShortcutUrl: 'URL (endereço web)',
+        sidebarShortcutUrlPlaceholder: 'Ex. https://twitch.tv',
+        sidebarShortcutCancel: 'Cancelar',
+        sidebarShortcutSave: 'Salvar',
         addToHome: 'Adicionar ao Início',
         changeProfile: 'Trocar perfil',
         newProfile: '+ Novo perfil',
@@ -412,6 +522,11 @@
         cancel: 'Cancelar',
         create: 'Criar',
         deleteProfile: 'Excluir perfil',
+        editProfile: 'Editar perfil',
+        save: 'Salvar',
+        changePhoto: 'Alterar foto',
+        removePhoto: 'Remover foto',
+        profileName: 'Nome',
         removeBookmark: 'Remover favorito',
         welcome: 'Bem-vindo ao Neutron',
         chooseProfile: 'Escolha um perfil para começar',
@@ -426,7 +541,10 @@
         panic: 'Botão de pânico',
         clearCache: 'Limpar cache e RAM',
         showSidebar: 'Mostrar/ocultar barra lateral',
-        tabTitleDefault: 'Nova aba'
+        tabTitleDefault: 'Nova aba',
+        loading: 'Carregando...',
+        taskManager: 'Gerenciador de Processos',
+        about: 'Sobre o Neutron'
       },
       home: {
         title: 'Neutron',
@@ -438,7 +556,7 @@
       settings: {
         title: 'Configurações',
         header: 'Configurações',
-        version: 'Neutron Browser v2.0.0',
+        version: 'Neutron Browser v1.0.2',
         tabs: ['Geral', 'Busca', 'Privacidade', 'Escudo', 'Aparência', 'Personalização', 'Desempenho'],
         general: [
           ['Hibernação Inteligente', 'Suspende abas inativas em segundo plano'],
@@ -462,6 +580,7 @@
           ['Tema da interface', 'Tema escuro / claro do navegador'],
           ['Forçar modo escuro', 'Força tema escuro em todos os sites'],
           ['Abas verticais', 'Coloca as abas em uma barra lateral vertical'],
+          ['Medidor de RAM', 'Mostra o uso de memória RAM na barra lateral'],
           ['Cor de destaque', 'Cor principal do navegador'],
           ['Densidade da interface', 'Ajusta o espaçamento da barra e das abas']
         ],
@@ -513,7 +632,22 @@
         languageOptionEs: 'Español',
         languageOptionEn: 'English',
         languageOptionPt: 'Português',
-        languageOptionFr: 'Français'
+        languageOptionFr: 'Français',
+        accentColors: {
+          gray: 'Cinza',
+          blue: 'Azul',
+          deepBlue: 'Azul intenso',
+          purple: 'Roxo',
+          green: 'Verde',
+          red: 'Vermelho',
+          amber: 'Âmbar',
+          orange: 'Laranja'
+        },
+        density: {
+          compact: 'Compacta',
+          comfortable: 'Confortável',
+          spacious: 'Espaçosa'
+        }
       },
       history: {
         clearAll: 'Limpar tudo',
@@ -547,6 +681,22 @@
         autoTheme: 'Automático',
         start: 'Começar',
         canChangeAnytime: 'Você pode mudar isso depois nas configurações'
+      },
+      taskManager: {
+        title: 'Gerenciador de Processos',
+        subtitle: 'Monitoramento e controle de recursos em tempo real',
+        totalMemory: 'Memória Total',
+        activeProcesses: 'Processos Ativos',
+        totalCpu: 'CPU Total (App)',
+        processTab: 'Processo / Aba',
+        cpuUsage: 'Uso de CPU',
+        memoryRam: 'Memória RAM',
+        action: 'Ação',
+        badgeMain: 'Principal',
+        badgeTab: 'Aba',
+        badgeService: 'Serviço',
+        kill: 'Finalizar',
+        protected: 'Protegido'
       }
     },
     fr: {
@@ -574,6 +724,8 @@
         pinTab: 'Épingler l’onglet',
         unpinTab: 'Désépingler l’onglet',
         closeOtherTabs: 'Fermer les autres onglets',
+        discardTab: 'Abandonner l\'onglet',
+        discarded: 'Abandonné',
         pinnedTab: 'Onglet épinglé',
         back: 'Retour',
         forward: 'Avancer',
@@ -584,6 +736,14 @@
         favorites: 'Favoris',
         addToFavorites: 'Ajouter aux favoris',
         addToSidebar: 'Ajouter à la barre latérale',
+        addSidebarShortcut: 'Ajouter un raccourci latéral',
+        sidebarShortcutTitle: 'Ajouter un raccourci latéral',
+        sidebarShortcutName: 'Nom',
+        sidebarShortcutNamePlaceholder: 'Ex. Twitch',
+        sidebarShortcutUrl: 'URL (adresse web)',
+        sidebarShortcutUrlPlaceholder: 'Ex. https://twitch.tv',
+        sidebarShortcutCancel: 'Annuler',
+        sidebarShortcutSave: 'Enregistrer',
         addToHome: 'Ajouter à l’accueil',
         changeProfile: 'Changer de profil',
         newProfile: '+ Nouveau profil',
@@ -593,6 +753,11 @@
         cancel: 'Annuler',
         create: 'Créer',
         deleteProfile: 'Supprimer le profil',
+        editProfile: 'Modifier le profil',
+        save: 'Enregistrer',
+        changePhoto: 'Changer la photo',
+        removePhoto: 'Supprimer la photo',
+        profileName: 'Nom',
         removeBookmark: 'Supprimer le marque-page',
         welcome: 'Bienvenue sur Neutron',
         chooseProfile: 'Choisissez un profil pour commencer',
@@ -607,7 +772,10 @@
         panic: 'Bouton panique',
         clearCache: 'Vider le cache et la RAM',
         showSidebar: 'Afficher/masquer la barre latérale',
-        tabTitleDefault: 'Nouvel onglet'
+        tabTitleDefault: 'Nouvel onglet',
+        loading: 'Chargement...',
+        taskManager: 'Gestionnaire de processus',
+        about: 'À propos de Neutron'
       },
       home: {
         title: 'Neutron',
@@ -619,7 +787,7 @@
       settings: {
         title: 'Paramètres',
         header: 'Paramètres',
-        version: 'Neutron Browser v2.0.0',
+        version: 'Neutron Browser v1.0.2',
         tabs: ['Général', 'Recherche', 'Confidentialité', 'Bouclier', 'Apparence', 'Personnalisation', 'Performances'],
         general: [
           ['Hibernation intelligente', 'Suspend les onglets inactifs en arrière-plan'],
@@ -643,6 +811,7 @@
           ['Thème de l’interface', 'Thème sombre / clair du navigateur'],
           ['Forcer le mode sombre', 'Force le thème sombre sur tous les sites'],
           ['Onglets verticaux', 'Place les onglets dans une barre latérale verticale'],
+          ['Compteur de RAM', 'Affiche l’utilisation de la RAM dans la barre latérale'],
           ['Couleur d’accent', 'Couleur principale du navigateur'],
           ['Densité de l’interface', 'Ajuste l’espacement de la barre et des onglets']
         ],
@@ -694,7 +863,22 @@
         languageOptionEs: 'Español',
         languageOptionEn: 'English',
         languageOptionPt: 'Português',
-        languageOptionFr: 'Français'
+        languageOptionFr: 'Français',
+        accentColors: {
+          gray: 'Gris',
+          blue: 'Bleu',
+          deepBlue: 'Bleu intense',
+          purple: 'Violet',
+          green: 'Vert',
+          red: 'Rouge',
+          amber: 'Ambre',
+          orange: 'Orange'
+        },
+        density: {
+          compact: 'Compacte',
+          comfortable: 'Confortable',
+          spacious: 'Spacieux'
+        }
       },
       history: {
         clearAll: 'Tout effacer',
@@ -728,6 +912,22 @@
         autoTheme: 'Automatique',
         start: 'Commencer',
         canChangeAnytime: 'Vous pouvez changer cela plus tard dans les paramètres'
+      },
+      taskManager: {
+        title: 'Gestionnaire de processus',
+        subtitle: 'Surveillance et contrôle des ressources en temps réel',
+        totalMemory: 'Mémoire totale',
+        activeProcesses: 'Processus actifs',
+        totalCpu: 'CPU total (App)',
+        processTab: 'Processus / Onglet',
+        cpuUsage: 'Utilisation CPU',
+        memoryRam: 'Mémoire RAM',
+        action: 'Action',
+        badgeMain: 'Principal',
+        badgeTab: 'Onglet',
+        badgeService: 'Service',
+        kill: 'Arrêter',
+        protected: 'Protégé'
       }
     }
   };
@@ -761,11 +961,6 @@
     document.documentElement.lang = locale;
     document.title = L('chrome.title');
 
-    setText(document.getElementById('logo-text'), L('chrome.brand'));
-    if (document.body.classList.contains('atomic-mode')) {
-      setText(document.getElementById('logo-text'), L('chrome.atomicMode'));
-    }
-
     setTitle(document.getElementById('add-tab-btn'), L('chrome.newTab'));
     setTitle(document.getElementById('win-minimize'), L('chrome.minimize'));
     setTitle(document.getElementById('win-maximize'), L('chrome.maximize'));
@@ -776,11 +971,9 @@
     setTitle(document.getElementById('nav-reload'), L('chrome.reload'));
     setTitle(document.getElementById('nav-home'), L('chrome.home'));
     setPlaceholder(document.getElementById('url-input'), L('chrome.urlPlaceholder'));
-    setText(document.getElementById('nav-go'), L('chrome.go'));
-    setTitle(document.getElementById('settings-btn'), L('chrome.settings'));
-    setTitle(document.getElementById('history-btn'), L('chrome.history'));
     setTitle(document.getElementById('fav-btn'), L('chrome.addToFavorites'));
     setTitle(document.getElementById('fav-chevron'), L('chrome.addToSidebar'));
+    setTitle(document.getElementById('sidebar-add-btn'), L('chrome.addSidebarShortcut'));
     setTitle(document.getElementById('shield-btn'), L('chrome.shield'));
     setTitle(document.getElementById('downloads-btn'), L('chrome.downloads'));
     setTitle(document.getElementById('sidebar-fav-btn'), L('chrome.favorites'));
@@ -795,7 +988,6 @@
     setTitle(document.getElementById('modal-guest-btn'), L('chrome.guestMode'));
     setText(document.getElementById('cancel-profile-btn'), L('chrome.cancel'));
     setText(document.getElementById('confirm-profile-btn'), L('chrome.create'));
-    setTitle(document.getElementById('profile-indicator'), L('chrome.changeProfile'));
     setPlaceholder(document.getElementById('new-profile-name'), L('chrome.newProfileName'));
 
     const profileModalHeader = document.querySelector('#profile-modal .profile-modal-header');
@@ -806,16 +998,56 @@
 
     setText(document.querySelector('#new-profile-dialog h3'), L('chrome.newProfile'));
     setPlaceholder(document.getElementById('new-profile-name'), L('chrome.newProfileName'));
+    setText(document.getElementById('profile-edit-title'), L('chrome.editProfile'));
+    setPlaceholder(document.getElementById('profile-edit-name'), L('chrome.profileName'));
+    setText(document.getElementById('profile-edit-save'), L('chrome.save'));
+    setText(document.getElementById('profile-edit-cancel'), L('chrome.cancel'));
+    setText(document.getElementById('profile-edit-delete'), L('chrome.deleteProfile'));
+    setText(document.getElementById('profile-edit-remove-photo'), L('chrome.removePhoto'));
+    setTitle(document.getElementById('profile-edit-avatar'), L('chrome.changePhoto'));
     setText(document.querySelector('#fav-dropdown li[data-type="fav"]'), `★ ${L('chrome.addToFavorites')}`);
     setText(document.querySelector('#fav-dropdown li[data-type="sidebar"]'), `📌 ${L('chrome.addToSidebar')}`);
     setText(document.querySelector('#fav-dropdown li[data-type="home"]'), `🏠 ${L('chrome.addToHome')}`);
     setText(document.getElementById('bookmark-ctx-remove'), `✕ ${L('chrome.removeBookmark')}`);
 
-    const profileIndicatorName = document.getElementById('profile-indicator-name');
-    if (profileIndicatorName) {
-      const current = profileIndicatorName.textContent.trim();
-      if (['Default', 'Invitado', 'Guest', 'Convidado', 'Invité', 'Padrão', 'Par défaut'].includes(current)) {
-        profileIndicatorName.textContent = L('chrome.defaultProfile');
+    setText(document.querySelector('#new-profile-btn'), `+ ${L('chrome.newProfile')}`);
+    setText(document.querySelector('#guest-mode-btn'), L('chrome.guestMode'));
+    setText(document.querySelector('#modal-new-profile-btn'), `+ ${L('chrome.newProfile')}`);
+    setText(document.querySelector('#modal-guest-btn'), L('chrome.guestMode'));
+    setText(document.querySelector('#profile-modal .profile-modal-header h2'), L('chrome.welcome'));
+    setText(document.querySelector('#profile-modal .profile-modal-header p'), L('chrome.chooseProfile'));
+    setText(document.querySelector('#new-profile-dialog h3'), L('chrome.newProfile'));
+    setPlaceholder(document.getElementById('new-profile-name'), L('chrome.newProfileName'));
+    setText(document.querySelector('#add-sidebar-shortcut-modal .modal-header'), L('chrome.sidebarShortcutTitle'));
+    setText(document.querySelector('#add-sidebar-shortcut-modal label[for="sidebar-shortcut-name-input"]'), L('chrome.sidebarShortcutName'));
+    setPlaceholder(document.getElementById('sidebar-shortcut-name-input'), L('chrome.sidebarShortcutNamePlaceholder'));
+    setText(document.querySelector('#add-sidebar-shortcut-modal label[for="sidebar-shortcut-url-input"]'), L('chrome.sidebarShortcutUrl'));
+    setPlaceholder(document.getElementById('sidebar-shortcut-url-input'), L('chrome.sidebarShortcutUrlPlaceholder'));
+    setText(document.getElementById('close-sidebar-modal-btn'), L('chrome.sidebarShortcutCancel'));
+    setText(document.getElementById('save-sidebar-shortcut-btn'), L('chrome.sidebarShortcutSave'));
+    setTitle(document.getElementById('sidebar-add-btn'), L('chrome.addSidebarShortcut'));
+
+    // Quick Settings dropdown
+    document.querySelectorAll('.qs-item .qs-label[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (key === 'settings') setText(el, L('chrome.settings'));
+      else if (key === 'history') setText(el, L('chrome.history'));
+      else if (key === 'taskManager') setText(el, L('chrome.taskManager'));
+      else if (key === 'about') setText(el, L('chrome.about'));
+    });
+
+    // Fav dropdown items
+    const favItems = document.querySelectorAll('#fav-dropdown li');
+    if (favItems[0]) setText(favItems[0], `★ ${L('chrome.addToFavorites')}`);
+    if (favItems[1]) setText(favItems[1], `📌 ${L('chrome.addToSidebar')}`);
+    if (favItems[2]) setText(favItems[2], `🏠 ${L('chrome.addToHome')}`);
+    setText(document.getElementById('bookmark-ctx-remove'), `✕ ${L('chrome.removeBookmark')}`);
+
+    const profileEl = document.getElementById('profile-indicator');
+    if (profileEl) {
+      const profileId = profileEl.dataset.profileId;
+      if (profileId === 'default') {
+        profileEl.title = L('chrome.defaultProfile');
       }
     }
   }
@@ -911,6 +1143,27 @@
       setText(appearanceCards[4].querySelector('.card-label h3'), t(locale, 'settings.appearance.4.0'));
       setText(appearanceCards[4].querySelector('.card-label p'), t(locale, 'settings.appearance.4.1'));
     }
+    if (appearanceCards[5]) {
+      setText(appearanceCards[5].querySelector('.card-label h3'), t(locale, 'settings.appearance.5.0'));
+      setText(appearanceCards[5].querySelector('.card-label p'), t(locale, 'settings.appearance.5.1'));
+    }
+
+    const colorKeys = ['gray', 'blue', 'deepBlue', 'purple', 'green', 'red', 'amber', 'orange'];
+    document.querySelectorAll('.accent-swatch').forEach((swatch, index) => {
+      const key = colorKeys[index];
+      if (key) {
+        const label = t(locale, `settings.accentColors.${key}`);
+        if (label) swatch.title = label;
+      }
+    });
+
+    document.querySelectorAll('.density-btn').forEach((btn) => {
+      const key = btn.dataset.value;
+      if (key) {
+        const label = t(locale, `settings.density.${key}`);
+        if (label) btn.textContent = label;
+      }
+    });
 
     const customizeCards = document.querySelectorAll('#panel-customize .card');
     customizeCards.forEach((card, idx) => {
@@ -1011,6 +1264,24 @@
     document.querySelectorAll('.dl-status-error').forEach((el) => { el.textContent = L('downloads.error'); });
   }
 
+  function applyTaskManagerPage(lang) {
+    const locale = normalize(lang);
+    const L = (path) => t(locale, path);
+    if (typeof document === 'undefined') return;
+    document.documentElement.lang = locale;
+    document.title = L('taskManager.title');
+    setText(document.getElementById('task-manager-title'), L('taskManager.title'));
+    setText(document.getElementById('task-manager-subtitle'), L('taskManager.subtitle'));
+    document.querySelectorAll('.metric-card-label').forEach((el) => {
+      const key = el.dataset.i18n;
+      if (key) setText(el, L(`taskManager.${key}`));
+    });
+    document.querySelectorAll('#task-manager-table th').forEach((th) => {
+      const key = th.dataset.i18n;
+      if (key) setText(th, L(`taskManager.${key}`));
+    });
+  }
+
   return {
     t,
     normalize,
@@ -1019,6 +1290,7 @@
     applySettingsPage,
     applyHistoryPage,
     applyFavoritesPage,
-    applyDownloadsPage
+    applyDownloadsPage,
+    applyTaskManagerPage
   };
 });

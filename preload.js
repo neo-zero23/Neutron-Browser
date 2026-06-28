@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld('api', {
   onProfileSelected: (callback) => ipcRenderer.on('profile-selected', (event, data) => callback(data)),
   onProfileDeleted: (callback) => ipcRenderer.on('profile-deleted', (event, data) => callback(data)),
   onProfilesInitialized: (callback) => ipcRenderer.on('profiles-initialized', (event, data) => callback(data)),
+  updateProfile: (data) => ipcRenderer.send('update-profile', data),
+  selectProfilePhoto: () => ipcRenderer.invoke('select-profile-photo'),
   navigateTo: (url) => ipcRenderer.send('navigate-to', url),
   goHome: () => ipcRenderer.send('go-home'),
   searchQuery: (query) => ipcRenderer.send('search-query', query),
@@ -29,8 +31,16 @@ contextBridge.exposeInMainWorld('api', {
   clearMemory: () => ipcRenderer.send('clear-memory'),
   triggerPanic: () => ipcRenderer.send('panic-mode'),
   toggleSidebar: (visible) => ipcRenderer.send('sidebar-toggle', visible),
-  hideWebview: () => ipcRenderer.send('hide-active-webview'),
-  showWebview: () => ipcRenderer.send('show-active-webview'),
+  hideWebview: () => ipcRenderer.invoke('hide-active-webview'),
+  showWebview: () => ipcRenderer.invoke('show-active-webview'),
+  openShortcutWindow: (kind) => ipcRenderer.send(`open-${kind}-shortcut-window`),
+  openSidebarShortcutWindow: () => ipcRenderer.send('open-sidebar-shortcut-window'),
+  openHomeShortcutWindow: () => ipcRenderer.send('open-home-shortcut-window'),
+  closeSidebarShortcutWindow: () => ipcRenderer.send('close-sidebar-shortcut-window'),
+  closeHomeShortcutWindow: () => ipcRenderer.send('close-home-shortcut-window'),
+  closeShortcutWindow: (kind) => ipcRenderer.send(`close-${kind}-shortcut-window`),
+  onBookmarkShortcutModalOpen: (callback) => ipcRenderer.on('open-bookmark-shortcut-modal', (event, data) => callback(data)),
+  onBookmarkShortcutModalClose: (callback) => ipcRenderer.on('close-bookmark-shortcut-modal', (event, data) => callback(data)),
 
   saveSettings: (settings) => ipcRenderer.send('save-settings', settings),
   loadSettings: () => ipcRenderer.invoke('load-settings'),
@@ -47,8 +57,7 @@ contextBridge.exposeInMainWorld('api', {
   getHistory: () => ipcRenderer.invoke('get-history'),
   deleteHistoryEntry: (url) => ipcRenderer.send('delete-history-entry', url),
   clearHistory: () => ipcRenderer.send('clear-history'),
-  openHistoryWindow: () => ipcRenderer.send('open-history-window'),
-  closeHistoryWindow: () => ipcRenderer.send('close-history-window'),
+  closeCurrentTab: () => ipcRenderer.send('close-current-tab'),
 
   getFavorites: () => ipcRenderer.invoke('get-favorites'),
   addFavorite: (data) => ipcRenderer.send('add-favorite', data),
@@ -99,9 +108,25 @@ contextBridge.exposeInMainWorld('api', {
   onShieldConfigUpdated: (callback) => ipcRenderer.on('shield-config-updated', (event, data) => callback(data)),
   onShieldStatsUpdated: (callback) => ipcRenderer.on('shield-stats-updated', (event, count) => callback(count)),
 
+  getAppMetrics: () => ipcRenderer.invoke('get-app-metrics'),
+  killProcess: (pid) => ipcRenderer.send('kill-process', pid),
+
   requestRestart: () => ipcRenderer.send('request-restart'),
   onRestartRequested: (callback) => ipcRenderer.on('restart-requested', (event, data) => callback(data)),
   onSettingsUpdated: (callback) => ipcRenderer.on('settings-updated', (event, data) => callback(data)),
   onHomeBackgroundChanged: (callback) => ipcRenderer.on('home-background-changed', (event, path) => callback(path)),
-  onThemeChanged: (callback) => ipcRenderer.on('theme-changed', (event, data) => callback(data))
+  onThemeChanged: (callback) => ipcRenderer.on('theme-changed', (event, data) => callback(data)),
+
+  toggleFullscreen: () => ipcRenderer.send('toggle-fullscreen'),
+  toggleDevTools: () => ipcRenderer.send('toggle-devtools'),
+  onFullscreenChanged: (callback) => ipcRenderer.on('fullscreen-changed', (event, isFullscreen) => callback(isFullscreen)),
+
+  zoomIn: () => ipcRenderer.send('zoom-in'),
+  zoomOut: () => ipcRenderer.send('zoom-out'),
+  zoomReset: () => ipcRenderer.send('zoom-reset'),
+  onZoomChanged: (callback) => ipcRenderer.on('zoom-changed', (event, data) => callback(data)),
+
+  discardTab: (tabId) => ipcRenderer.send('discard-tab', tabId),
+  onTabDiscarded: (callback) => ipcRenderer.on('tab-discarded', (event, data) => callback(data)),
+  onTabRestored: (callback) => ipcRenderer.on('tab-restored', (event, data) => callback(data))
 });

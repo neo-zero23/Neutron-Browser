@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add sidebar shortcut</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-dark" style="background:var(--bg-main);overflow:hidden;">
+  <div class="modal-overlay" style="opacity:1;pointer-events:auto;position:fixed;inset:0;z-index:2147483647;">
+    <div class="modal-card" style="width:100%;max-width:340px;">
+      <div class="modal-header" id="sidebar-shortcut-modal-title">Add sidebar shortcut</div>
+      <div class="modal-field">
+        <label for="sidebar-shortcut-name-input" id="sidebar-shortcut-name-label">Name</label>
+        <input type="text" id="sidebar-shortcut-name-input" placeholder="e.g. Twitch" autocomplete="off">
+      </div>
+      <div class="modal-field">
+        <label for="sidebar-shortcut-url-input" id="sidebar-shortcut-url-label">URL (web address)</label>
+        <input type="text" id="sidebar-shortcut-url-input" placeholder="e.g. https://twitch.tv" autocomplete="off">
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel-btn" id="close-sidebar-modal-btn">Cancel</button>
+        <button class="modal-btn save-btn" id="save-sidebar-shortcut-btn">Save</button>
+      </div>
+    </div>
+  </div>
+  <script src="i18n.js"></script>
+  <script src="sidebar-shortcut-renderer.js"></script>
+</body>
+</html>
