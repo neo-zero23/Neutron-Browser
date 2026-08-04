@@ -1,4 +1,4 @@
-# 🔥 Neutron Browser
+# 🔥 Neutron Browser (Early Beta)
 Neutron browser is a browser I made out of boredom and for fun. Honestly, it's based on Chromium and was made with Electron.js.
 Its main goal is to be simple and allow easy browsing. At first
 I wasn't going to release it, but I decided to do so so more people could try it and form their own opinions :)
