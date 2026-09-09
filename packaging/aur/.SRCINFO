@@ -1,0 +1,20 @@
+pkgbase = neutron-browser
+	pkgdesc = Fast, private and optimized Chromium browser (Electron)
+	pkgver = 1.1.0
+	pkgrel = 1
+	url = https://github.com/neo-zero23/Neutron-Browser
+	arch = x86_64
+	license = GPL3
+	depends = fuse2
+	depends = gtk3
+	depends = nss
+	depends = libxss
+	depends = libxtst
+	depends = xdg-utils
+	options = !strip
+	source = Neutron-Browser-1.1.0-linux-x86_64.AppImage::https://github.com/neo-zero23/Neutron-Browser/releases/download/v1.1.0/Neutron-Browser-1.1.0-linux-x86_64.AppImage
+	source = neutron.desktop
+	sha256sums = 5d1b200fa3439df3510378ec7dc89ec1210171d01c2ae00eac0ed11d4a5cab27
+	sha256sums = 3ea2a84bd3b44da082ba80d9c0dcf448d293d046203dd5aff45b1f12c06a8c57
+
+pkgname = neutron-browser

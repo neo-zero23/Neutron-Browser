@@ -8,13 +8,16 @@ url="https://github.com/neo-zero23/Neutron-Browser"
 license=('GPL3')
 depends=('fuse2' 'gtk3' 'nss' 'libxss' 'libxtst' 'xdg-utils')
 options=('!strip')
-source=("Neutron-Browser-1.1.0.AppImage::${url}/releases/download/v1.1.0/Neutron-Browser-1.1.0-linux-x86_64.AppImage"
+_appimage="Neutron-Browser-${pkgver}-linux-x86_64.AppImage"
+source=("${_appimage}::${url}/releases/download/v${pkgver}/${_appimage}"
         "neutron.desktop")
-sha256sums=('SKIP'
-            'SKIP')
+# NOTE: re-calcular con `sha256sum` si se reconstruye el AppImage.
+# El nombre del asset en el Release v1.1.0 debe ser exactamente ${_appimage}.
+sha256sums=('5d1b200fa3439df3510378ec7dc89ec1210171d01c2ae00eac0ed11d4a5cab27'
+            '3ea2a84bd3b44da082ba80d9c0dcf448d293d046203dd5aff45b1f12c06a8c57')
 
 package() {
-  install -Dm755 "$srcdir/Neutron-Browser-1.1.0.AppImage" "$pkgdir/opt/neutron/neutron-browser.AppImage"
+  install -Dm755 "$srcdir/${_appimage}" "$pkgdir/opt/neutron/neutron-browser.AppImage"
   install -Dm644 "$srcdir/neutron.desktop" "$pkgdir/usr/share/applications/neutron-browser.desktop"
   install -dm755 "$pkgdir/usr/bin"
   printf '#!/bin/sh\nexec /opt/neutron/neutron-browser.AppImage "$@"\n' > "$pkgdir/usr/bin/neutron-browser"

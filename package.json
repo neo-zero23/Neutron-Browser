@@ -30,6 +30,7 @@
       "category": "Network;WebBrowser",
       "maintainer": "Jesus <neutron@example.com>",
       "description": "Neutron Browser - fast, private, optimized Chromium browser",
+      "artifactName": "Neutron-Browser-${version}-linux-${arch}.${ext}",
       "desktop": {
         "Name": "Neutron Browser",
         "Comment": "Fast, private and optimized browser",

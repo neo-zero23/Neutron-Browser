@@ -20,7 +20,7 @@ Verificación: borrar `userData/neutron-config.json`, `npm start`, pasar wizard,
 
 ## Fase 2 — Linux AppImage (B) desde Arch
 
-- `package.json`: `dist:appimage = electron-builder --linux AppImage`, completar `build.linux` con `maintainer, desktop {Name, Comment, MimeType, Categories Network;WebBrowser}`, `artifactName Neutron-Browser-1.1.0.AppImage`.
+- `package.json`: `dist:appimage = electron-builder --linux AppImage`, completar `build.linux` con `maintainer, desktop {Name, Comment, MimeType, Categories Network;WebBrowser}`, `artifactName Neutron-Browser-1.1.0-linux-x86_64.AppImage` (sin espacios, alineado con PKGBUILD/AUR).
 - Deps Arch host: `base-devel, fuse2/fuse3, libvips`, `npm rebuild sharp`.
 - Build compatible: `distrobox create --image ubuntu:22.04` o `docker run -v $PWD:/app ubuntu:22.04`, dentro `npm ci + npm run dist:appimage`.
 - Fixes Linux: UA sin `Windows NT`, fonts locales (hoy Google Fonts online), probar `frame:false` Wayland/X11 con `--ozone-platform-hint=auto`, `xdg-open`, `dialog`.
