@@ -97,5 +97,38 @@ In current testing, the executable received a 0 detections result.
 
 <img width="1915" height="926" alt="Captura de pantalla 2026-06-02 203553" src="https://github.com/user-attachments/assets/a25a7d5d-5e69-453f-81e5-d0b1e8f91a55" />
 
+
+## 🙏 Credits
+
+1. Ad-Blocking Engine
+Since version v1.1.0, Neutron Browser has integrated the @cliqz/adblocker v1.34.0 content-blocking engine as a core component for privacy protection.
+
+Original author: Cliqz / Ghostery.
+
+License: Mozilla Public License 2.0 (MPL-2.0).
+
+Maintenance note: This package was recently renamed to @ghostery/adblocker by its new maintainer (Ghostery), which now uses it as the foundation for its own extensions.
+
+2. Filter Lists (Blocking Rules)
+The rules processed by the engine come from the community, ensuring an up-to-date experience:
+
+EasyList (and EasyPrivacy):
+
+Dual License: GNU General Public License v3.0 (GPL-3.0) or Creative Commons Attribution-ShareAlike 3.0 (CC BY-SA 3.0).
+
+Attribution: "The EasyList authors" must be acknowledged as the source of the material.
+
+3. LightSession (ChatGPT Optimization)
+The DOM optimization feature for long ChatGPT conversations uses light-session.
+
+Author: 11me / LightSession Contributors.
+
+License: MIT License (Copyright © 2025 LightSession Contributors).
+
+
 ## 📜 License
 This project is open-source and protected under the **GNU General Public License v3.0 (GPL-3.0)**. See the `LICENSE` file for more details.
+
+
+
+
