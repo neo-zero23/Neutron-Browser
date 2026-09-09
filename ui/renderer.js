@@ -754,6 +754,16 @@ window.api.onTabSwitched(({ tabId, profile }) => {
   }
 });
 
+// Load initial shield state
+if (window.api && window.api.getShieldConfig) {
+  window.api.getShieldConfig().then((config) => {
+    if (config && config.shieldEnabled !== undefined) {
+      document.body.classList.toggle('shield-disabled', !config.shieldEnabled);
+      if (shieldBtn) shieldBtn.classList.toggle('shield-off', !config.shieldEnabled);
+    }
+  });
+}
+
 // Handle Tab Close
 window.api.onTabClosed(({ tabId }) => {
   delete tabData[tabId];
@@ -1075,12 +1085,29 @@ window.api.onTabSwitched(() => { updateFavStar(); });
 
 // Shield blocked count
 const shieldCountBadge = document.getElementById('shield-count-badge');
+const shieldBtn = document.getElementById('shield-btn');
 window.api.onShieldStatsUpdated((count) => {
   if (shieldCountBadge) {
     shieldCountBadge.textContent = count;
     shieldCountBadge.style.display = count > 0 ? 'flex' : 'none';
   }
 });
+
+window.api.onShieldConfigUpdated((config) => {
+  if (config && config.shieldEnabled !== undefined) {
+    document.body.classList.toggle('shield-disabled', !config.shieldEnabled);
+    if (shieldBtn) {
+      shieldBtn.classList.toggle('shield-off', !config.shieldEnabled);
+    }
+  }
+});
+
+// Toggle shield on click
+if (shieldBtn) {
+  shieldBtn.addEventListener('click', () => {
+    window.api.toggleShield();
+  });
+}
 
 // Apply density class to body
 function applyDensity(density) {
@@ -1444,14 +1471,14 @@ window.addEventListener('keydown', (e) => {
   }
 
   // F12 or Ctrl+Shift+I = DevTools
-  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i'))) {
+  if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i'))) {
     e.preventDefault();
     window.api.toggleDevTools();
     return;
   }
 
   // Zoom: Ctrl++ / Ctrl+= / Ctrl+-
-  if (e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey) {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
     if (e.key === '+' || e.key === '=') {
       e.preventDefault();
       window.api.zoomIn();
@@ -1556,3 +1583,4 @@ window.addEventListener('keydown', (e) => {
     konamiIndex = (key === firstKey) ? 1 : 0;
   }
 });
+

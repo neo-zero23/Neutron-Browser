@@ -392,6 +392,7 @@ body.vertical-tabs #tabs-list {
   justify-content: space-between;
   align-items: center;
   padding: 15px 0;
+  position: relative;
   z-index: 99;
   transition: all 0.3s ease;
   overflow: hidden;
@@ -723,6 +724,14 @@ body.vertical-tabs #tabs-list {
 
 .shield-btn {
   position: relative;
+}
+
+.shield-btn.shield-off {
+  opacity: 0.4;
+}
+
+.shield-btn.shield-off:hover {
+  opacity: 0.7;
 }
 
 .shield-count-badge {
