@@ -1017,6 +1017,7 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <button id="sync-export-btn"             style="background:var(--accent-blue);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">Export data</button>
           <button id="sync-import-btn" style="background:rgba(255,255,255,0.06);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">Import data</button>
+          <button id="rerun-wizard-btn" title="Repetir asistente de configuración" style="background:rgba(255,255,255,0.06);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;padding:8px 16px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">🧙 Repetir asistente</button>
           <span id="sync-status" style="font-size:12px;color:var(--text-muted);font-family:'Inter',sans-serif;"></span>
         </div>
       </div>
@@ -1087,6 +1088,21 @@
         <button class="toggle" id="toggle-restore-session" role="switch" aria-checked="false"></button>
       </div>
 
+      <div class="card">
+        <div class="card-info">
+          <div class="card-icon blue">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+            </svg>
+          </div>
+          <div class="card-label">
+            <h3>LightSession</h3>
+            <p>Optimiza ChatGPT eliminando hist�rico del DOM para evitar lag</p>
+          </div>
+        </div>
+        <button class="toggle" id="toggle-lightsession" role="switch" aria-checked="false"></button>
+      </div>
+
       <button class="purge-btn" id="purge-btn">
         <svg viewBox="0 0 24 24" width="18" height="18">
           <path d="M15 4V3H9v1H4v2h1v13c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V6h1V4h-5zm2 15H7V6h10v13z" />
@@ -1144,6 +1160,7 @@
     setupToggle('toggle-hibernation', 'smartHibernation');
     setupToggle('toggle-telemetry', 'telemetryBlock');
     setupToggle('toggle-dnt', 'doNotTrack');
+    setupToggle('toggle-lightsession', 'lightSession');
     setupToggle('toggle-cookies-exit', 'autoClearCookiesOnExit');
     setupToggle('toggle-cache-exit', 'autoClearCacheOnExit');
     setupToggle('toggle-dark-mode', 'forceDarkMode');
@@ -1329,6 +1346,7 @@
         if (config.disableHardwareAcceleration) document.getElementById('toggle-hw-accel')?.classList.add('active');
         if (config.energySaver) document.getElementById('toggle-energy-saver')?.classList.add('active');
         if (config.restoreSession) document.getElementById('toggle-restore-session')?.classList.add('active');
+        if (config.lightSession !== false) document.getElementById('toggle-lightsession')?.classList.add('active');
         if (config.showHomeButton !== false) document.getElementById('toggle-home-btn')?.classList.add('active');
         if (config.showSidebar !== false) document.getElementById('toggle-sidebar-vis')?.classList.add('active');
         if (config.showRamMeter !== false) document.getElementById('toggle-ram-meter')?.classList.add('active');
@@ -1515,6 +1533,11 @@
       });
     }
 
+    const rerunBtn = document.getElementById('rerun-wizard-btn');
+    if (rerunBtn && window.api && window.api.rerunSetupWizard) {
+      rerunBtn.addEventListener('click', () => window.api.rerunSetupWizard());
+    }
+
     // Purge memory
     const purgeBtn = document.getElementById('purge-btn');
     const purgeStats = document.getElementById('purge-stats');
@@ -1564,6 +1587,7 @@
       if (config.disableHardwareAcceleration !== undefined) document.getElementById('toggle-hw-accel')?.classList.toggle('active', !!config.disableHardwareAcceleration);
       if (config.energySaver !== undefined) document.getElementById('toggle-energy-saver')?.classList.toggle('active', !!config.energySaver);
       if (config.restoreSession !== undefined) document.getElementById('toggle-restore-session')?.classList.toggle('active', !!config.restoreSession);
+      if (config.lightSession !== undefined) document.getElementById('toggle-lightsession')?.classList.toggle('active', !!config.lightSession);
       if (config.showHomeButton !== undefined) document.getElementById('toggle-home-btn')?.classList.toggle('active', !!config.showHomeButton);
       if (config.showSidebar !== undefined) document.getElementById('toggle-sidebar-vis')?.classList.toggle('active', !!config.showSidebar);
       if (config.language !== undefined) {

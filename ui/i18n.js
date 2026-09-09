@@ -218,7 +218,15 @@
         lightTheme: 'Claro',
         autoTheme: 'Automático',
         start: 'Comenzar',
-        canChangeAnytime: 'Puedes cambiar esto después en configuración'
+        canChangeAnytime: 'Puedes cambiar esto después en configuración',
+        wizard: {
+          welcome: 'Bienvenido a Neutron', subtitle: 'Configura tu navegador en 5 pasos',
+          searchEngine: 'Motor de búsqueda', accent: 'Color de acento', density: 'Densidad',
+          protection: 'Protección y privacidad', shield: 'Activar Neutron Shield (adblock)',
+          profile: 'Tu perfil', import: '¿Traes datos de otro Neutron?',
+          importHint: 'Puedes importar tu backup JSON después desde Configuración → Personalizar → Local Sync. Por ahora seguimos.',
+          ready: 'Todo listo', skip: 'Omitir'
+        }
       },
       taskManager: {
         title: 'Administrador de Procesos',
@@ -449,7 +457,15 @@
         lightTheme: 'Light',
         autoTheme: 'Auto',
         start: 'Get Started',
-        canChangeAnytime: 'You can change this later in settings'
+        canChangeAnytime: 'You can change this later in settings',
+        wizard: {
+          welcome: 'Welcome to Neutron', subtitle: 'Set up your browser in 5 steps',
+          searchEngine: 'Search engine', accent: 'Accent color', density: 'Density',
+          protection: 'Protection & privacy', shield: 'Enable Neutron Shield (adblock)',
+          profile: 'Your profile', import: 'Bringing data from another Neutron?',
+          importHint: 'You can import your JSON backup later from Settings → Customize → Local Sync. Continue for now.',
+          ready: 'All set', skip: 'Skip'
+        }
       },
       taskManager: {
         title: 'Process Manager',
@@ -680,7 +696,15 @@
         lightTheme: 'Claro',
         autoTheme: 'Automático',
         start: 'Começar',
-        canChangeAnytime: 'Você pode mudar isso depois nas configurações'
+        canChangeAnytime: 'Você pode mudar isso depois nas configurações',
+        wizard: {
+          welcome: 'Bem-vindo ao Neutron', subtitle: 'Configure seu navegador em 5 passos',
+          searchEngine: 'Motor de busca', accent: 'Cor de destaque', density: 'Densidade',
+          protection: 'Proteção e privacidade', shield: 'Ativar Neutron Shield (adblock)',
+          profile: 'Seu perfil', import: 'Trazendo dados de outro Neutron?',
+          importHint: 'Você pode importar seu backup JSON depois em Configurações → Personalizar → Sync local.',
+          ready: 'Tudo pronto', skip: 'Pular'
+        }
       },
       taskManager: {
         title: 'Gerenciador de Processos',
@@ -911,7 +935,15 @@
         lightTheme: 'Clair',
         autoTheme: 'Automatique',
         start: 'Commencer',
-        canChangeAnytime: 'Vous pouvez changer cela plus tard dans les paramètres'
+        canChangeAnytime: 'Vous pouvez changer cela plus tard dans les paramètres',
+        wizard: {
+          welcome: 'Bienvenue dans Neutron', subtitle: 'Configurez votre navigateur en 5 étapes',
+          searchEngine: 'Moteur de recherche', accent: 'Couleur d’accent', density: 'Densité',
+          protection: 'Protection et confidentialité', shield: 'Activer Neutron Shield (adblock)',
+          profile: 'Votre profil', import: 'Importer depuis un autre Neutron ?',
+          importHint: 'Vous pourrez importer votre backup JSON depuis Paramètres → Personnaliser → Sync locale.',
+          ready: 'Tout est prêt', skip: 'Passer'
+        }
       },
       taskManager: {
         title: 'Gestionnaire de processus',

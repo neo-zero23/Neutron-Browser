@@ -5,6 +5,11 @@ const { fileURLToPath } = require('url');
 const https = require('https');
 const NeutronDB = require('./db');
 const NeutronI18n = require('./ui/i18n');
+const { ElectronBlocker, fromElectronDetails } = require('@cliqz/adblocker-electron');
+const fetch = require('cross-fetch');
+
+// LightSession page script for ChatGPT performance optimization
+const LIGHTSESSION_SCRIPT = fs.readFileSync(path.join(__dirname, 'lightsession.js'), 'utf8');
 
 function extractDomain(url) {
   try { return new URL(url).hostname || ''; } catch (e) { return ''; }
@@ -70,15 +75,15 @@ function buildTabContextMenu(tabId) {
   ]);
 }
 
-// ? OPTIMIZATIONS: Low Consumption Profile � set BEFORE app is ready
-app.commandLine.appendSwitch('js-flags', '--expose-gc --max-old-space-size=256');
-app.commandLine.appendSwitch('renderer-process-limit', '4');
+// ? OPTIMIZATIONS: Stable rendering profile
+// NOTE v1.1: 'disable-gpu' removed — on Linux/Mesa (esp. KDE Wayland) it
+// prevents the first paint, so frameless windows never fire 'ready-to-show'
+// and the app looks like it never opens. GPU stays on; users with old
+// hardware can still disable HW acceleration from Settings.
+app.commandLine.appendSwitch('js-flags', '--expose-gc --max-old-space-size=512');
+app.commandLine.appendSwitch('renderer-process-limit', '6');
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-app.commandLine.appendSwitch('disable-gpu-rasterization');
-app.commandLine.appendSwitch('enable-low-end-device-mode');
 app.commandLine.appendSwitch('disable-extensions');
-app.commandLine.appendSwitch('disable-software-rasterizer');
-app.commandLine.appendSwitch('disable-gpu-compositing');
 app.commandLine.appendSwitch('disable-renderer-backgrounding');
 
 let mainWindow;
@@ -93,6 +98,7 @@ let SESSION_PATH;
 const DEFAULT_CONFIG = {
   firstLaunch: true,
   searchEngine: 'google',
+  lightSession: true,
   smartHibernation: false,
   energySaver: false,
   telemetryBlock: false,
@@ -110,9 +116,11 @@ const DEFAULT_CONFIG = {
   language: 'es',
   homeBackgroundPath: '',
   theme: 'dark',
-  accentColor: '#8c8c8c'
+  accentColor: '#8c8c8c',
+  shieldEnabled: true
 };
 let neutronConfig = { ...DEFAULT_CONFIG };
+let adBlocker = null;
 
 const SEARCH_ENGINES = {
   google: 'https://www.google.com/search?q=',
@@ -253,7 +261,9 @@ function createMainWindow() {
     minWidth: 800,
     minHeight: 600,
     frame: false,
-    icon: path.join(__dirname, 'assets', 'new-logo.ico'),
+    icon: process.platform === 'linux'
+      ? path.join(__dirname, 'assets', 'new-logo-256.png')
+      : path.join(__dirname, 'assets', 'new-logo.ico'),
     backgroundColor: '#0d0d0d',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -303,13 +313,15 @@ function createOnboardingWindow() {
   }
 
   onboardingWindow = new BrowserWindow({
-    width: 600,
-    height: 620,
+    width: 640,
+    height: 700,
     minWidth: 600,
     minHeight: 620,
     frame: false,
-    modal: true,
-    show: false,
+    modal: false,
+    // NOTE v1.1: show immediately. With show:false + 'ready-to-show' the wizard
+    // could stay invisible forever on KDE Wayland if the first paint is delayed.
+    show: true,
     backgroundColor: '#1a1a1a',
     webPreferences: {
       preload: path.join(__dirname, 'preload-onboarding.js'),
@@ -320,7 +332,9 @@ function createOnboardingWindow() {
     }
   });
 
-  onboardingWindow.loadFile(path.join(__dirname, 'ui', 'onboarding.html'));
+  const wizardPath = path.join(__dirname, 'ui', 'setup-wizard.html');
+  const legacyPath = path.join(__dirname, 'ui', 'onboarding.html');
+  onboardingWindow.loadFile(fs.existsSync(wizardPath) ? wizardPath : legacyPath);
 
   onboardingWindow.once('ready-to-show', () => {
     if (onboardingWindow && !onboardingWindow.isDestroyed()) {
@@ -382,6 +396,7 @@ function showActiveWebview() {
       try {
         mainWindow.contentView.addChildView(tab.view);
         updateViewBounds(tab.view);
+        wakeTab(tab);
       } catch (e) { }
     }
   }
@@ -478,10 +493,22 @@ function createTab(url = null, profileId = null) {
     mainWindow.webContents.send('tab-loading-started', { tabId });
   });
 
+  // LightSession for ChatGPT performance
+  view.webContents.on('did-navigate', (event, url) => {
+    if (neutronConfig.lightSession && url && (url.includes('chatgpt.com') || url.includes('chat.openai.com'))) {
+      view.webContents.executeJavaScript(LIGHTSESSION_SCRIPT).catch(() => {});
+    }
+  });
+  view.webContents.on('did-navigate-in-page', (event, url) => {
+    if (neutronConfig.lightSession && url && (url.includes('chatgpt.com') || url.includes('chat.openai.com'))) {
+      view.webContents.executeJavaScript(LIGHTSESSION_SCRIPT).catch(() => {});
+    }
+  });
+
   view.webContents.on('did-stop-loading', () => {
     mainWindow.webContents.send('tab-loading-finished', { tabId });
 
-    if (tabProfile !== 'invitado') {
+    if (tabProfile !== 'invitado' && !view.webContents.isDestroyed()) {
       const url = view.webContents.getURL();
       const title = view.webContents.getTitle();
       if (url && !url.startsWith('file://') && !url.startsWith('about:')) {
@@ -505,6 +532,14 @@ function createTab(url = null, profileId = null) {
     tab.mediaPlaying = false;
     if (tab.id === activeTabId && neutronConfig.energySaver) {
       tab.view.webContents.setFrameRate(30);
+    }
+  });
+
+  // Auto-recover crashed renderer processes
+  view.webContents.on('render-process-gone', (event, details) => {
+    console.log(`[Tab] Renderer crashed for tab ${tab.id}:`, details.reason);
+    if (!view.webContents.isDestroyed()) {
+      view.webContents.reload();
     }
   });
 
@@ -565,7 +600,9 @@ function switchTab(tabId) {
       }
     } else {
       mainWindow.contentView.removeChildView(t.view);
-      t.view.webContents.setFrameRate(2);
+      if (!t.mediaPlaying) {
+        t.view.webContents.setFrameRate(2);
+      }
     }
   });
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
@@ -680,6 +717,9 @@ function broadcastShieldStats() {
   BrowserWindow.getAllWindows().forEach(w => {
     if (!w.webContents.isDestroyed()) w.webContents.send('shield-stats-updated', count);
   });
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('shield-config-updated', { ...SHIELD_CONFIG, shieldEnabled: neutronConfig.shieldEnabled });
+  }
 }
 
 function resolveSpecialUrl(webContents, urlStr) {
@@ -809,7 +849,7 @@ ipcMain.on('panic-mode', () => {
   if (mainWindow) mainWindow.minimize();
 });
 
-// ? ONBOARDING COMPLETION HANDLER
+// ? ONBOARDING COMPLETION HANDLER (Setup Wizard v1.1 — full config)
 ipcMain.on('onboarding-complete', (event, config) => {
   console.log('[??] Onboarding completed with config:', config);
 
@@ -818,12 +858,26 @@ ipcMain.on('onboarding-complete', (event, config) => {
     return;
   }
 
-  // Update neutronConfig with onboarding selections
-  if (config.language) {
-    neutronConfig.language = config.language;
-  }
-  if (config.theme) {
-    neutronConfig.theme = config.theme;
+  // Update neutronConfig with wizard selections (whitelist para no inyectar basura)
+  const allowed = ['language', 'theme', 'searchEngine', 'density', 'accentColor',
+    'shieldEnabled', 'doNotTrack', 'disableWebRTC', 'restoreSession', 'showSidebar',
+    'smartHibernation', 'energySaver', 'verticalTabs'];
+  allowed.forEach(k => {
+    if (config[k] !== undefined) neutronConfig[k] = config[k];
+  });
+
+  // Shield toggles -> SHIELD_CONFIG
+  if (config.blockAds !== undefined) SHIELD_CONFIG.blockAds = !!config.blockAds;
+  if (config.blockTrackers !== undefined) SHIELD_CONFIG.blockTrackers = !!config.blockTrackers;
+  if (typeof saveShieldConfig === 'function') saveShieldConfig();
+  if (typeof rebuildShieldSets === 'function') rebuildShieldSets();
+
+  // Nombre de perfil inicial (renombra Default si el usuario lo escribió)
+  if (config.profileName && typeof config.profileName === 'string' && config.profileName.trim()) {
+    try {
+      const p = profilesData.profiles.find(x => x.id === 'default');
+      if (p) { p.name = config.profileName.trim().slice(0, 24); saveProfiles(); }
+    } catch (e) { }
   }
 
   // Mark first launch as complete
@@ -850,11 +904,27 @@ ipcMain.on('onboarding-complete', (event, config) => {
   }
 });
 
+// Re-ejecutar wizard desde Configuración (v1.1)
+ipcMain.on('rerun-setup-wizard', () => {
+  neutronConfig.firstLaunch = true;
+  saveNeutronConfig();
+  createOnboardingWindow();
+});
+ipcMain.handle('rerun-setup-wizard', async () => {
+  neutronConfig.firstLaunch = true;
+  saveNeutronConfig();
+  createOnboardingWindow();
+  return { success: true };
+});
+
 ipcMain.on('sidebar-toggle', (event, visible) => {
   sidebarVisible = visible;
-  tabs.forEach(t => {
-    if (isWebContentsAlive(t.view?.webContents)) updateViewBounds(t.view);
-  });
+  // Defer bounds update to match CSS transition duration
+  setTimeout(() => {
+    tabs.forEach(t => {
+      if (isWebContentsAlive(t.view?.webContents)) updateViewBounds(t.view);
+    });
+  }, 300);
 });
 
 ipcMain.on('save-settings', (event, settings) => {
@@ -888,11 +958,25 @@ ipcMain.on('save-settings', (event, settings) => {
     applyEnergySaverToTabs();
   }
 
+  if (settings.lightSession !== undefined) {
+    if (settings.lightSession) {
+      tabs.forEach(t => {
+        if (t.url && (t.url.includes('chatgpt.com') || t.url.includes('chat.openai.com'))) {
+          if (isWebContentsAlive(t.view?.webContents)) {
+            t.view.webContents.executeJavaScript(LIGHTSESSION_SCRIPT).catch(() => {});
+          }
+        }
+      });
+    }
+  }
+
   if (settings.showSidebar !== undefined) {
     sidebarVisible = settings.showSidebar;
-    tabs.forEach(t => {
-      if (isWebContentsAlive(t.view?.webContents)) updateViewBounds(t.view);
-    });
+    setTimeout(() => {
+      tabs.forEach(t => {
+        if (isWebContentsAlive(t.view?.webContents)) updateViewBounds(t.view);
+      });
+    }, 300);
   }
 
   if (settings.verticalTabs !== undefined) {
@@ -1992,7 +2076,7 @@ ipcMain.handle('block-current-site', () => {
     saveShieldConfig();
     rebuildShieldSets();
     if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents) {
-      mainWindow.webContents.send('shield-config-updated', SHIELD_CONFIG);
+      mainWindow.webContents.send('shield-config-updated', { ...SHIELD_CONFIG, shieldEnabled: neutronConfig.shieldEnabled });
     }
   }
   return { success: true, domain };
@@ -2156,77 +2240,114 @@ function isShieldBlocked(urlStr) {
   return false;
 }
 
-function initNetworkShield() {
-  rebuildShieldSets();
-  shieldInitialized = true;
-
-  function registerSessionListener(sess) {
-    sess.webRequest.onBeforeRequest((details, callback) => {
-      const urlStr = details.url;
-
-      if (isShieldBlocked(urlStr)) {
-        SHIELD_CONFIG.blockedCount++;
-        return callback({ cancel: true });
-      }
-
-      callback({ cancel: false });
+function initAdBlocker() {
+  try {
+    adBlocker = null;
+    ElectronBlocker.fromLists(fetch, [
+      'https://easylist.to/easylist/easylist.txt',
+      'https://easylist.to/easylist/easyprivacy.txt',
+    ], {
+      enableCompression: true,
+      guessRequestTypeFromUrl: true,
+      loadNetworkFilters: true,
+    }).then(blocker => {
+      adBlocker = blocker;
+      registerRequestHandler();
+      registeredShieldPartitions.forEach(p => {
+        try { registerRequestHandler(session.fromPartition(p)); } catch (e) { }
+      });
+      console.log('[Shield] AdBlocker loaded EasyList + EasyPrivacy');
+    }).catch(e => {
+      console.error('[Shield] AdBlocker load failed:', e.message);
     });
-
-    sess.webRequest.onBeforeSendHeaders((details, callback) => {
-      const headers = { ...details.requestHeaders };
-
-      // Override User-Agent for WhatsApp Web compatibility
-      if (details.url && details.url.includes('web.whatsapp.com')) {
-        headers['User-Agent'] = WHATSAPP_UA;
-      }
-
-      if (neutronConfig.doNotTrack) {
-        headers['DNT'] = '1';
-      }
-
-      callback({ requestHeaders: headers });
-    });
+  } catch (e) {
+    console.error('[Shield] AdBlocker init error:', e.message);
   }
+}
 
-  registerSessionListener(session.defaultSession);
-
-  setInterval(() => {
-    if (SHIELD_CONFIG.blockedCount > 0) {
-      console.log(`[??? Shield] ${SHIELD_CONFIG.blockedCount} requests blocked`);
-      broadcastShieldStats();
+function registerRequestHandler(sess) {
+  const target = sess || session.defaultSession;
+  const handler = (details, callback) => {
+    if (!neutronConfig.shieldEnabled) {
+      return callback({ cancel: false });
     }
-  }, 60000);
+
+    if (adBlocker) {
+      try {
+        const request = fromElectronDetails(details);
+        if (adBlocker.config.guessRequestTypeFromUrl && request.type === 'other') {
+          request.guessTypeOfRequest();
+        }
+        if (request.isMainFrame()) {
+          return callback({});
+        }
+        const { redirect, match } = adBlocker.match(request);
+        if (redirect) {
+          SHIELD_CONFIG.blockedCount++;
+          return callback({ redirectURL: redirect.dataUrl });
+        }
+        if (match) {
+          SHIELD_CONFIG.blockedCount++;
+          return callback({ cancel: true });
+        }
+      } catch (e) {
+        console.log('[Shield] Match error:', e.message);
+      }
+    }
+
+    if (isShieldBlocked(details.url)) {
+      SHIELD_CONFIG.blockedCount++;
+      return callback({ cancel: true });
+    }
+
+    callback({ cancel: false });
+  };
+
+  target.webRequest.onBeforeRequest(null);
+  target.webRequest.onBeforeRequest(handler);
 }
 
 function registerShieldForPartition(partitionName) {
   if (!shieldInitialized) return;
   try {
     const sess = session.fromPartition(partitionName);
-    sess.webRequest.onBeforeRequest((details, callback) => {
-      if (isShieldBlocked(details.url)) {
-        SHIELD_CONFIG.blockedCount++;
-        return callback({ cancel: true });
-      }
-      callback({ cancel: false });
-    });
-
-    sess.webRequest.onBeforeSendHeaders((details, callback) => {
-      const headers = { ...details.requestHeaders };
-
-      // Override User-Agent for WhatsApp Web compatibility
-      if (details.url && details.url.includes('web.whatsapp.com')) {
-        headers['User-Agent'] = WHATSAPP_UA;
-      }
-
-      if (neutronConfig.doNotTrack) {
-        headers['DNT'] = '1';
-      }
-
-      callback({ requestHeaders: headers });
-    });
+    registerRequestHandler(sess);
+    registerCombinedListener(sess);
   } catch (e) {
     console.error('[Shield] Partition register error:', e.message);
   }
+}
+
+function registerCombinedListener(sess) {
+  sess.webRequest.onBeforeSendHeaders((details, callback) => {
+    const headers = { ...details.requestHeaders };
+
+    if (details.url && details.url.includes('web.whatsapp.com')) {
+      headers['User-Agent'] = WHATSAPP_UA;
+    }
+
+    if (neutronConfig.doNotTrack) {
+      headers['DNT'] = '1';
+    }
+
+    callback({ requestHeaders: headers });
+  });
+}
+
+function initNetworkShield() {
+  rebuildShieldSets();
+  shieldInitialized = true;
+
+  registerCombinedListener(session.defaultSession);
+  initAdBlocker();
+  broadcastShieldStats();
+
+  setInterval(() => {
+    if (SHIELD_CONFIG.blockedCount > 0) {
+      console.log(`[Shield] Stats: ${SHIELD_CONFIG.blockedCount} requests blocked this session`);
+      broadcastShieldStats();
+    }
+  }, 10000);
 }
 
 ipcMain.handle('get-app-metrics', async () => {
@@ -2286,14 +2407,14 @@ ipcMain.on('kill-process', (event, pid) => {
 });
 
 ipcMain.handle('get-shield-config', () => {
-  return { ...SHIELD_CONFIG, blockedCount: SHIELD_CONFIG.blockedCount };
+  return { ...SHIELD_CONFIG, blockedCount: SHIELD_CONFIG.blockedCount, shieldEnabled: neutronConfig.shieldEnabled };
 });
 
 ipcMain.on('save-shield-config', (event, config) => {
   SHIELD_CONFIG = { ...SHIELD_CONFIG, ...config };
   saveShieldConfig();
   rebuildShieldSets();
-  mainWindow.webContents.send('shield-config-updated', SHIELD_CONFIG);
+  mainWindow.webContents.send('shield-config-updated', { ...SHIELD_CONFIG, shieldEnabled: neutronConfig.shieldEnabled });
   if (config.blockTelemetry !== undefined) {
     neutronConfig.telemetryBlock = config.blockTelemetry;
     saveNeutronConfig();
@@ -2314,6 +2435,17 @@ ipcMain.on('remove-blacklisted-domain', (event, domain) => {
   SHIELD_CONFIG.blacklistedDomains = SHIELD_CONFIG.blacklistedDomains.filter(d => d !== domain.toLowerCase().trim());
   saveShieldConfig();
   rebuildShieldSets();
+});
+
+ipcMain.on('toggle-shield', () => {
+  neutronConfig.shieldEnabled = !neutronConfig.shieldEnabled;
+  saveNeutronConfig();
+  registerRequestHandler();
+  registeredShieldPartitions.forEach(p => {
+    try { registerRequestHandler(session.fromPartition(p)); } catch (e) { }
+  });
+  broadcastShieldStats();
+  console.log(`[Shield] Toggled ${neutronConfig.shieldEnabled ? 'ON' : 'OFF'}`);
 });
 
 // App lifecycle

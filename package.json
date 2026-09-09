@@ -1,21 +1,41 @@
 {
   "name": "neutron-browser",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Neutron Browser - Modo Rendimiento Extremo en Electron",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-packager . \"Neutron Browser\" --platform=win32 --arch=x64 --icon=assets/new-logo.ico --out=dist --overwrite --asar"
+    "dist": "electron-packager . \"Neutron Browser\" --platform=win32 --arch=x64 --icon=assets/new-logo.ico --out=dist --overwrite --asar",
+    "dist:linux": "electron-packager . \"Neutron Browser\" --platform=linux --arch=x64 --icon=assets/new-logo-256.png --out=dist --overwrite --asar",
+    "dist:appimage": "electron-builder --linux AppImage",
+    "dist:win-dir": "electron-builder --win dir",
+    "build:container-ubuntu": "distrobox create --image ubuntu:22.04 --name neutron-build || true"
   },
   "build": {
     "appId": "com.jesus.neutron-browser",
     "productName": "Neutron Browser",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "dist"
     },
     "win": {
-      "target": "nsis",
+      "target": "dir",
       "icon": "assets/new-logo.ico"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "assets/new-logo-256.png",
+      "category": "Network;WebBrowser",
+      "maintainer": "Jesus <neutron@example.com>",
+      "description": "Neutron Browser - fast, private, optimized Chromium browser",
+      "desktop": {
+        "Name": "Neutron Browser",
+        "Comment": "Fast, private and optimized browser",
+        "MimeType": "x-scheme-handler/http;x-scheme-handler/https;text/html",
+        "Categories": "Network;WebBrowser"
+      }
     },
     "nsis": {
       "oneClick": true,
@@ -34,7 +54,15 @@
   "license": "ISC",
   "devDependencies": {
     "@electron/packager": "^18.4.4",
-    "electron": "^41.7.0",
-    "electron-builder": "^25.1.8"
+    "electron": "^41.10.7",
+    "electron-builder": "^25.1.8",
+    "sharp": "^0.35.3"
+  },
+  "dependencies": {
+    "@cliqz/adblocker-electron": "^1.34.0",
+    "cross-fetch": "^4.1.0"
+  },
+  "allowScripts": {
+    "electron@41.10.7": true
   }
 }

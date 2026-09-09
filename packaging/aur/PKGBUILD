@@ -1,0 +1,22 @@
+# Maintainer: Jesus <neutron@example.com>
+pkgname=neutron-browser
+pkgver=1.1.0
+pkgrel=1
+pkgdesc="Fast, private and optimized Chromium browser (Electron)"
+arch=('x86_64')
+url="https://github.com/neo-zero23/Neutron-Browser"
+license=('GPL3')
+depends=('fuse2' 'gtk3' 'nss' 'libxss' 'libxtst' 'xdg-utils')
+options=('!strip')
+source=("Neutron-Browser-1.1.0.AppImage::${url}/releases/download/v1.1.0/Neutron-Browser-1.1.0-linux-x86_64.AppImage"
+        "neutron.desktop")
+sha256sums=('SKIP'
+            'SKIP')
+
+package() {
+  install -Dm755 "$srcdir/Neutron-Browser-1.1.0.AppImage" "$pkgdir/opt/neutron/neutron-browser.AppImage"
+  install -Dm644 "$srcdir/neutron.desktop" "$pkgdir/usr/share/applications/neutron-browser.desktop"
+  install -dm755 "$pkgdir/usr/bin"
+  printf '#!/bin/sh\nexec /opt/neutron/neutron-browser.AppImage "$@"\n' > "$pkgdir/usr/bin/neutron-browser"
+  chmod 755 "$pkgdir/usr/bin/neutron-browser"
+}

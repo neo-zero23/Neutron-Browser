@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neutron Browser - Setup Wizard</title>
+  <link rel="stylesheet" href="setup-wizard.css">
+</head>
+<body>
+  <div class="wiz-container">
+    <div class="wiz-header">
+      <div class="wiz-logo">●</div>
+      <h1 class="wiz-title" data-i18n="onboarding.wizard.welcome">Bienvenido a Neutron</h1>
+      <p class="wiz-subtitle" data-i18n="onboarding.wizard.subtitle">Configura tu navegador en 5 pasos</p>
+      <div class="wiz-progress"><div class="wiz-progress-fill" id="wiz-progress-fill"></div></div>
+      <p class="wiz-step-label" id="wiz-step-label">Paso 1 de 5</p>
+    </div>
+
+    <div class="wiz-content">
+      <!-- Paso 1: Idioma + Tema -->
+      <div class="wiz-step" data-step="1">
+        <h2 data-i18n="onboarding.selectLanguage">Selecciona tu idioma</h2>
+        <div class="opt-grid cols4">
+          <button class="opt-btn lang-btn" data-language="es">🇪🇸<span>Español</span></button>
+          <button class="opt-btn lang-btn" data-language="en">🇺🇸<span>English</span></button>
+          <button class="opt-btn lang-btn" data-language="pt">🇧🇷<span>Português</span></button>
+          <button class="opt-btn lang-btn" data-language="fr">🇫🇷<span>Français</span></button>
+        </div>
+        <h2 data-i18n="onboarding.selectTheme">Elige tu tema</h2>
+        <div class="opt-grid cols3">
+          <button class="opt-btn theme-btn" data-theme="dark">🌙<span data-i18n="onboarding.darkTheme">Oscuro</span></button>
+          <button class="opt-btn theme-btn" data-theme="light">☀️<span data-i18n="onboarding.lightTheme">Claro</span></button>
+          <button class="opt-btn theme-btn" data-theme="auto">🌓<span data-i18n="onboarding.autoTheme">Automático</span></button>
+        </div>
+      </div>
+
+      <!-- Paso 2: Buscador + Apariencia -->
+      <div class="wiz-step hidden" data-step="2">
+        <h2 data-i18n="onboarding.wizard.searchEngine">Motor de búsqueda</h2>
+        <div class="opt-grid cols4">
+          <button class="opt-btn engine-btn" data-engine="google">G<span>Google</span></button>
+          <button class="opt-btn engine-btn" data-engine="bing">B<span>Bing</span></button>
+          <button class="opt-btn engine-btn" data-engine="duckduckgo">D<span>DuckDuckGo</span></button>
+          <button class="opt-btn engine-btn" data-engine="startpage">S<span>Startpage</span></button>
+        </div>
+        <h2 data-i18n="onboarding.wizard.accent">Color de acento</h2>
+        <div class="opt-grid cols4" id="wiz-accent-grid">
+          <button class="opt-btn accent-btn" data-accent="#8c8c8c" style="--sw:#8c8c8c"><i></i><span>Gray</span></button>
+          <button class="opt-btn accent-btn" data-accent="#4ea8de" style="--sw:#4ea8de"><i></i><span>Blue</span></button>
+          <button class="opt-btn accent-btn" data-accent="#a855f7" style="--sw:#a855f7"><i></i><span>Purple</span></button>
+          <button class="opt-btn accent-btn" data-accent="#34d399" style="--sw:#34d399"><i></i><span>Green</span></button>
+        </div>
+        <h2 data-i18n="onboarding.wizard.density">Densidad</h2>
+        <div class="opt-grid cols3">
+          <button class="opt-btn density-btn" data-density="compact"><span>Compact</span></button>
+          <button class="opt-btn density-btn" data-density="comfortable"><span>Comfortable</span></button>
+          <button class="opt-btn density-btn" data-density="spacious"><span>Spacious</span></button>
+        </div>
+      </div>
+
+      <!-- Paso 3: Shield + Privacidad -->
+      <div class="wiz-step hidden" data-step="3">
+        <h2 data-i18n="onboarding.wizard.protection">Protección y privacidad</h2>
+        <label class="wiz-toggle"><input type="checkbox" id="wiz-shield" checked><span data-i18n="onboarding.wizard.shield">Activar Neutron Shield (adblock)</span></label>
+        <label class="wiz-toggle"><input type="checkbox" id="wiz-blockAds" checked><span>Block Ads</span></label>
+        <label class="wiz-toggle"><input type="checkbox" id="wiz-blockTrackers" checked><span>Block Trackers</span></label>
+        <label class="wiz-toggle"><input type="checkbox" id="wiz-doNotTrack"><span>Do Not Track (DNT)</span></label>
+        <label class="wiz-toggle"><input type="checkbox" id="wiz-disableWebRTC"><span>Disable WebRTC (anti-fugas VPN)</span></label>
+      </div>
+
+      <!-- Paso 4: Perfil + Import -->
+      <div class="wiz-step hidden" data-step="4">
+        <h2 data-i18n="onboarding.wizard.profile">Tu perfil</h2>
+        <input class="wiz-input" id="wiz-profile-name" maxlength="24" placeholder="Nombre del perfil (opcional)">
+        <h2 data-i18n="onboarding.wizard.import">¿Traes datos de otro Neutron?</h2>
+        <p class="wiz-hint" data-i18n="onboarding.wizard.importHint">Puedes importar tu backup JSON después desde Configuración → Personalizar → Local Sync. Por ahora seguimos.</p>
+        <label class="wiz-toggle"><input type="checkbox" id="wiz-restoreSession"><span>Restaurar sesión (reabrir pestañas al iniciar)</span></label>
+        <label class="wiz-toggle"><input type="checkbox" id="wiz-showSidebar" checked><span>Mostrar barra lateral</span></label>
+      </div>
+
+      <!-- Paso 5: Listo -->
+      <div class="wiz-step hidden" data-step="5">
+        <h2 data-i18n="onboarding.wizard.ready">Todo listo</h2>
+        <p class="wiz-hint" data-i18n="onboarding.canChangeAnytime">Puedes cambiar esto después en configuración</p>
+        <div class="wiz-summary" id="wiz-summary"></div>
+      </div>
+    </div>
+
+    <div class="wiz-footer">
+      <button class="wiz-btn secondary" id="wiz-back">←</button>
+      <button class="wiz-btn secondary" id="wiz-skip" data-i18n="onboarding.wizard.skip">Omitir</button>
+      <button class="wiz-btn primary" id="wiz-next">→</button>
+    </div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="setup-wizard.js"></script>
+</body>
+</html>

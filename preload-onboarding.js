@@ -11,13 +11,14 @@ const { contextBridge, ipcRenderer } = require('electron');
  */
 contextBridge.exposeInMainWorld('onboarding', {
   /**
-   * Send onboarding completion data to main process
-   * @param {Object} config - { language, theme, timestamp }
+   * Send wizard completion data to main process
+   * @param {Object} config - full setup-wizard payload (language, theme, searchEngine, ...)
    */
   sendComplete: (config) => {
     console.log('[Preload] Sending onboarding-complete:', config);
     ipcRenderer.send('onboarding-complete', config);
-  }
+  },
+  rerun: () => ipcRenderer.send('rerun-setup-wizard')
 });
 
 console.log('[Preload] Onboarding preload loaded. window.onboarding exposed.');

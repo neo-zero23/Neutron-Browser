@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Neutron Browser
+Comment=Fast, private and optimized browser
+Exec=neutron-browser %U
+Icon=neutron-browser
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;
+MimeType=x-scheme-handler/http;x-scheme-handler/https;text/html;
+StartupWMClass=Neutron Browser

@@ -1,0 +1,39 @@
+/* Neutron Setup Wizard v1.1 — 5 pasos */
+:root {
+  --bg-primary: #1a1a1a; --bg-secondary: #2d2d2d; --bg-tertiary: #3a3a3a;
+  --text-primary: #e5e5e5; --text-secondary: #a1a1aa;
+  --accent-blue: #007acc; --accent-bright: #0d9dff;
+  --border-color: rgba(255,255,255,.08); --transition: all .2s ease;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; background: var(--bg-primary); color: var(--text-primary); overflow: hidden; user-select: none; }
+.wiz-container { display: flex; flex-direction: column; height: 100vh; padding: 28px 28px 20px; background: linear-gradient(135deg,#1a1a1a 0%,#242424 100%); }
+.wiz-header { text-align: center; }
+.wiz-logo { font-size: 40px; color: var(--accent-bright); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% {opacity:1} 50% {opacity:.6} }
+.wiz-title { font-size: 26px; margin: 4px 0; }
+.wiz-subtitle { font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; }
+.wiz-progress { height: 6px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; max-width: 420px; margin: 0 auto; }
+.wiz-progress-fill { height: 100%; width: 20%; background: var(--accent-blue); transition: width .25s ease; }
+.wiz-step-label { font-size: 11px; color: var(--text-secondary); }
+.wiz-content { flex: 1; overflow-y: auto; max-width: 480px; width: 100%; margin: 8px auto; }
+.wiz-step.hidden { display: none; }
+.wiz-step h2 { font-size: 14px; margin: 16px 0 8px; }
+.opt-grid { display: grid; gap: 10px; }
+.opt-grid.cols4 { grid-template-columns: repeat(4,1fr); }
+.opt-grid.cols3 { grid-template-columns: repeat(3,1fr); }
+.opt-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 10px; cursor: pointer; color: var(--text-primary); font-size: 12px; transition: var(--transition); }
+.opt-btn:hover { background: var(--bg-tertiary); transform: translateY(-2px); }
+.opt-btn.active { background: var(--accent-blue); border-color: var(--accent-bright); color: #fff; }
+.accent-btn i { width: 26px; height: 26px; border-radius: 50%; background: var(--sw); display: block; border: 2px solid rgba(255,255,255,.3); }
+.wiz-toggle { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer; }
+.wiz-toggle input { width: 18px; height: 18px; accent-color: var(--accent-blue); }
+.wiz-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 14px; }
+.wiz-hint { font-size: 12px; color: var(--text-secondary); }
+.wiz-summary { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-size: 12px; white-space: pre-line; }
+.wiz-footer { display: flex; gap: 10px; max-width: 480px; width: 100%; margin: 0 auto; }
+.wiz-btn { flex: 1; padding: 13px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; transition: var(--transition); }
+.wiz-btn.primary { background: var(--accent-blue); color: #fff; flex: 2; }
+.wiz-btn.primary:hover { background: var(--accent-bright); }
+.wiz-btn.secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); }
+.wiz-btn:disabled { opacity: .4; cursor: not-allowed; }

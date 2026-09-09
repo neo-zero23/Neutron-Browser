@@ -107,6 +107,7 @@ contextBridge.exposeInMainWorld('api', {
   blockCurrentSite: () => ipcRenderer.invoke('block-current-site'),
   onShieldConfigUpdated: (callback) => ipcRenderer.on('shield-config-updated', (event, data) => callback(data)),
   onShieldStatsUpdated: (callback) => ipcRenderer.on('shield-stats-updated', (event, count) => callback(count)),
+  toggleShield: () => ipcRenderer.send('toggle-shield'),
 
   getAppMetrics: () => ipcRenderer.invoke('get-app-metrics'),
   killProcess: (pid) => ipcRenderer.send('kill-process', pid),
@@ -128,5 +129,7 @@ contextBridge.exposeInMainWorld('api', {
 
   discardTab: (tabId) => ipcRenderer.send('discard-tab', tabId),
   onTabDiscarded: (callback) => ipcRenderer.on('tab-discarded', (event, data) => callback(data)),
-  onTabRestored: (callback) => ipcRenderer.on('tab-restored', (event, data) => callback(data))
+  onTabRestored: (callback) => ipcRenderer.on('tab-restored', (event, data) => callback(data)),
+
+  rerunSetupWizard: () => ipcRenderer.send('rerun-setup-wizard')
 });
